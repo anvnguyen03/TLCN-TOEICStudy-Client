@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "primereact/button"
 import { Checkbox } from "primereact/checkbox"
 import { Divider } from "primereact/divider"
@@ -7,7 +8,7 @@ import { Password } from "primereact/password"
 import { ChangeEvent, FormEvent, useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./register.css"
-import { register } from "../../services/authService"
+import { callRegister } from "../../services/authService"
 import { ApiResponse } from "../../types/backend"
 import Swal from "sweetalert2"
 import withReactContent from "sweetalert2-react-content"
@@ -98,7 +99,7 @@ export const RegisterPage = () => {
 
         try {
             fireLoading()
-            const response: ApiResponse<any> =  await register(form)
+            const response: ApiResponse<any> =  await callRegister(form)
             closeLoading()
             if (response.status === 'CREATED') {
                 MySwal.fire({
@@ -110,13 +111,6 @@ export const RegisterPage = () => {
                 }).then(() => {
                     navigate(`/register/verify?email=${form.email}`)
                 })
-            } else {
-                MySwal.fire({
-                    position: "center",
-                    icon: "error",
-                    title: response.error as string, 
-                    text: response.message
-                })
             }
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse<any>>
@@ -125,7 +119,7 @@ export const RegisterPage = () => {
                 title: "Cancelled!",
                 text: axiosError.response?.data.message,
                 icon: "error"
-              })
+            })
         }
     }
 

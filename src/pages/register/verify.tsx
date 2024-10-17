@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "primereact/button"
 import { FloatLabel } from "primereact/floatlabel"
 import { InputOtp } from "primereact/inputotp"
@@ -7,7 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 import withReactContent from "sweetalert2-react-content"
 import { ApiResponse } from "../../types/backend"
-import { verify } from "../../services/authService"
+import { callVerify } from "../../services/authService"
 import { AxiosError } from "axios"
 
 export const VerifyPage = () => {
@@ -25,7 +26,7 @@ export const VerifyPage = () => {
 
         try {
             fireLoading()
-            const response: ApiResponse<any> = await verify({ email, otp })
+            const response: ApiResponse<any> = await callVerify({ email, otp })
             if (response.status === 'OK') {
                 MySwal.fire({
                     title: 'Success',

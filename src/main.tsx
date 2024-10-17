@@ -9,6 +9,8 @@ import 'primeflex/primeflex.css';
 
 
 import { PrimeReactProvider } from 'primereact/api';
+import { Provider } from 'react-redux';
+import store from './store/store.ts';
         
 const value = {
   ripple: true  // enable ripple animation
@@ -16,8 +18,10 @@ const value = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PrimeReactProvider value={value}>
-      <App />
-    </PrimeReactProvider>
+    <Provider store={store}>
+      <PrimeReactProvider value={value}>
+          <App />
+      </PrimeReactProvider>
+    </Provider>
   </StrictMode>,
 )
