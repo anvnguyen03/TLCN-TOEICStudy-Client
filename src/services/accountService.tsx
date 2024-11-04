@@ -1,4 +1,4 @@
-import { ApiResponse, IFetchAccount } from '../types/backend'
+import { ApiResponse, IFetchAccount } from '../types/type'
 import apiClient from './AxiosAuthInterceptor'
 
 const baseURL = '/account'

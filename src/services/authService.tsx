@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from 'axios';
-import { ApiResponse } from '../types/backend';
+import { ApiResponse } from '../types/type';
 
 const baseURL = 'http://localhost:8080/api/v1/auth'
 

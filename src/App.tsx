@@ -10,13 +10,14 @@ import Dashboard from './pages/dashboard/dashboard';
 import { useEffect } from 'react';
 import { useAppDispatch } from './hooks/reduxHooks';
 import { fetchAccount } from './store/authSlice';
+import DoTestPage from './pages/test/do-test';
 
 function App() {
 
   const dispatch = useAppDispatch()
 
   useEffect(() => {
-    dispatch(fetchAccount())  
+    dispatch(fetchAccount())
   })
 
   return (
@@ -27,11 +28,10 @@ function App() {
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/register/verify' element={<VerifyPage />} />
         <Route path='/login' element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
+        <Route path="/test/:id/start" element={<DoTestPage />} />
 
         {/* Protected Routes for Users */}
-        <Route element={<ProtectedRoute allowedRoles={['USER', 'ADMIN']} />}>
-          <Route path="/home" element={<HomePage/>} />
-        </Route>
 
         {/* Protected Routes for Admin */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>

@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { jwtDecode } from "jwt-decode";
-import { callFetchAccount } from "../services/accountService";
+import { callFetchAccount } from "../services/AccountService";
 
 export const fetchAccount = createAsyncThunk(
     'account/fetchAccount',

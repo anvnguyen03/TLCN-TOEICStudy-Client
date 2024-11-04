@@ -9,10 +9,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { AppDispatch } from "../../store/store";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
-import { callLogin } from "../../services/authService";
+import { callLogin } from "../../services/AuthService";
 import { login } from "../../store/authSlice";
 import { AxiosError } from "axios";
-import { ApiResponse } from "../../types/backend";
+import { ApiResponse } from "../../types/type";
 import { useAppSelector } from "../../hooks/reduxHooks";
 
 interface FormData {
@@ -35,7 +35,6 @@ export default function LoginPage() {
         if (isAuthenticated) {
             navigate('/home')
         }
-        console.log(isAuthenticated)
 
         const isValid = validateForm()
         setValidForm(isValid)

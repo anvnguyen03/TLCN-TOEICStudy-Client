@@ -7,8 +7,8 @@ import { FormEvent, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import Swal from "sweetalert2"
 import withReactContent from "sweetalert2-react-content"
-import { ApiResponse } from "../../types/backend"
-import { callVerify } from "../../services/authService"
+import { ApiResponse } from "../../types/type"
+import { callVerify } from "../../services/AuthService"
 import { AxiosError } from "axios"
 
 export const VerifyPage = () => {
