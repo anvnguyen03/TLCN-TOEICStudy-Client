@@ -5,8 +5,10 @@ import { RadioButton, RadioButtonChangeEvent } from "primereact/radiobutton"
 export const QuestionCard: React.FC<{
     question: QuestionDTO,
     onSelectAnswer: (answer: string) => void,
+    onMarkQuestion: () => void,
+    isMarkedQuestion: boolean,
     selectedAnswer: string
-}> = ({ question, onSelectAnswer, selectedAnswer }) => {
+}> = ({ question, onSelectAnswer, onMarkQuestion, isMarkedQuestion, selectedAnswer }) => {
 
     const answerOptions: AnswerOption[] = [
         { name: question.answer1, key: 'A' },
@@ -17,7 +19,14 @@ export const QuestionCard: React.FC<{
 
     return (
         <Card
-            title={`Question ` + question.orderNumber}
+            title={
+                <strong
+                    className={`question-number ${isMarkedQuestion ? 'marked' : ''} mr-2`}
+                    onClick={() => onMarkQuestion()}
+                >
+                    {question.orderNumber}
+                </strong>
+            }
             pt={{
                 title: { className: 'text-center' },
                 content: { className: 'flex items-center justify-center text-center gap-4' }

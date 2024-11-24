@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from "react"
+import React, { Suspense, useEffect, useRef, useState } from "react"
 import { UserLayout } from "../../layouts/user layouts/Userlayout"
 import { DisplayTestItemDTO, ETestItemType, OrderNumber, UserAnswer, UserAnswerSheet } from "../../types/type.ts"
 import { useTestItem } from "../../hooks/testHooks"
@@ -6,10 +6,16 @@ import { useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { Toolbar } from "primereact/toolbar"
-import { renderPart, renderQuestion, renderQuestionGroup } from "../../utils/renderTestItem.tsx"
+import { renderListeningTestDirections, renderPart, renderQuestion, renderQuestionGroup } from "../../utils/RenderTestItem.tsx"
+import { Sidebar } from "primereact/sidebar"
+import "./do-test.css"
+import { ScrollPanel } from "primereact/scrollpanel"
+import { Divider } from "primereact/divider"
+import { Toast } from "primereact/toast"
 
 const DoTestPage: React.FC = () => {
 
+    const toast = useRef<Toast>(null)
     const audioSrc = "/Practice_Set_TOEIC_Test 1.mp3"
 
     const duration = 120 // minute
@@ -20,10 +26,11 @@ const DoTestPage: React.FC = () => {
     const [currentIndex, setCurrentIndex] = useState(60) // index của displayTestItems
     const [userAnswerSheet, setUserAnswerSheet] = useState<UserAnswerSheet>(new Map<OrderNumber, UserAnswer>)
     const [audio] = useState(() => {
-        const audioElement = new Audio(audioSrc);
-        audioElement.loop = false;
-        return audioElement;
+        const audioElement = new Audio(audioSrc)
+        audioElement.loop = false
+        return audioElement
     })
+    const [ansSheetVisible, setAnsSheetVisible] = useState<boolean>(false)    // set visible of answer list
 
     // Hàm hỗ trợ lấy partNum của DisplayTestItemDTO
     const getPartNum = (item: DisplayTestItemDTO): number | undefined => {
@@ -73,7 +80,7 @@ const DoTestPage: React.FC = () => {
             }
         }
 
-        audio.addEventListener("timeupdate", handleTimeUpdate);
+        audio.addEventListener("timeupdate", handleTimeUpdate)
 
         return () => {
             audio.removeEventListener("timeupdate", handleTimeUpdate);
@@ -83,6 +90,35 @@ const DoTestPage: React.FC = () => {
             }
         }
     }, [audio, currentIndex, isListeningSection, listeningItems])
+
+    useEffect(() => {
+        // khởi tạo trước answer sheet với 200 câu hỏi và index của displayItemTest
+        const initializeAnswerSheet = () => {
+            const prevUserAnswerSheet = new Map(userAnswerSheet)
+            displayTestItems
+                .forEach((item, index) => {
+                    if (item.type == ETestItemType.QUESTION) {
+                        const userAnswer: UserAnswer = {
+                            displayItemIndex: index,
+                            questionId: item.question!.id,
+                            isMarked: false
+                        }
+                        prevUserAnswerSheet.set(item.question!.orderNumber, userAnswer)
+                    } else if (item.type == ETestItemType.QUESTION_GROUP) {
+                        item.questionGroup?.subQuestions.forEach((subItem) => {
+                            const userAnswer: UserAnswer = {
+                                displayItemIndex: index,
+                                questionId: subItem.id,
+                                isMarked: false
+                            }
+                            prevUserAnswerSheet.set(subItem.orderNumber, userAnswer)
+                        })
+                    }
+                })
+            setUserAnswerSheet(prevUserAnswerSheet)
+        }
+        initializeAnswerSheet()
+    }, [displayTestItems])  // chỉ khởi tạo được sau khi đã fetch displayTestItems
 
     // Xử lý chuyển tiếp thủ công cho Reading test
     const handleNextReadingItem = () => {
@@ -112,18 +148,165 @@ const DoTestPage: React.FC = () => {
             case ETestItemType.PART:
                 return item.part ? renderPart(item.part) : null
             case ETestItemType.QUESTION:
-                return item.question ? renderQuestion(item.question, handleAnswerSelect, userAnswerSheet) : null
+                return item.question ? renderQuestion(item.question, handleAnswerSelect, handleMarkQuestion, userAnswerSheet) : null
             case ETestItemType.QUESTION_GROUP:
-                return item.questionGroup ? renderQuestionGroup(item.questionGroup, handleAnswerSelect, userAnswerSheet) : null
+                return item.questionGroup ? renderQuestionGroup(item.questionGroup, handleAnswerSelect, handleMarkQuestion, userAnswerSheet) : null
             default:
                 return null
+        }
+    }
+
+    const renderAnswerSheet = () => {
+        const answerSheet = Array.from(userAnswerSheet)
+        // chuyển từ Map sang Array sẽ có dạng [1, {...}] với 1 (Array[0]) là orderNumber
+        const answersPart1 = answerSheet.filter(answer => answer[0] >= 1 && answer[0] <= 6)
+        const answersPart2 = answerSheet.filter(answer => answer[0] >= 7 && answer[0] <= 31)
+        const answersPart3 = answerSheet.filter(answer => answer[0] >= 32 && answer[0] <= 70)
+        const answersPart4 = answerSheet.filter(answer => answer[0] >= 71 && answer[0] <= 100)
+        const answersPart5 = answerSheet.filter(answer => answer[0] >= 101 && answer[0] <= 130)
+        const answersPart6 = answerSheet.filter(answer => answer[0] >= 131 && answer[0] <= 146)
+        const answersPart7 = answerSheet.filter(answer => answer[0] >= 147 && answer[0] <= 200)
+
+        return (
+            <div className="flex flex-column flex-wrap justify-content-between">
+                {/* Part 1 */}
+                <div className="mb-2">
+                    <h4>Part 1</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart1.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                style={{ cursor: 'default' }}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 2 */}
+                <div className="mb-2">
+                    <h4>Part 2</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart2.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                style={{ cursor: 'default' }}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 3 */}
+                <div className="mb-2">
+                    <h4>Part 3</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart3.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                style={{ cursor: 'default' }}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 4 */}
+                <div className="mb-2">
+                    <h4>Part 4</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart4.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                style={{ cursor: 'default' }}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 5 */}
+                <div className="mb-2">
+                    <h4>Part 5</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart5.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 6 */}
+                <div className="mb-2">
+                    <h4>Part 6</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart6.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                {/* Part 7 */}
+                <div className="mb-2">
+                    <h4>Part 7</h4>
+                    <div className="flex flex-wrap" style={{ justifyContent: 'left' }}>
+                        {answersPart7.map((answer) => (
+                            <div
+                                key={answer[1].questionId}
+                                className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
+                                onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
+                            >
+                                {answer[1].questionId}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    const handleMarkQuestion = (orderNumber: number) => {
+        setUserAnswerSheet((prevAnswers: UserAnswerSheet) => {
+            const updatedAnswers = new Map(prevAnswers)
+            const currentAnswer = updatedAnswers.get(orderNumber)
+            if (currentAnswer) {
+                const mark: boolean = !currentAnswer.isMarked
+                updatedAnswers.set(orderNumber, { ...currentAnswer, isMarked: mark })
+            }
+            return updatedAnswers
+        })
+    }
+
+    const handleAnswerSheetItemClick = (displayItemIndex: number) => {
+        if (isListeningSection) {
+            toast.current?.show({ severity: 'warn', summary: 'Info', detail: 'You are in Listening test. Can not move to Reading test' })
+        } else {
+            setCurrentIndex(displayItemIndex)
+            setCurrentDisplayTestItem(displayTestItems[displayItemIndex])
+            setAnsSheetVisible(false)
         }
     }
 
     const handleAnswerSelect = (orderNumber: number, questionId: number, answer: string) => {
         setUserAnswerSheet((prevAnswers: UserAnswerSheet) => {
             const updatedAnswers = new Map(prevAnswers)
-            updatedAnswers.set(orderNumber, { questionId, answer })
+            const currentAnswer = updatedAnswers.get(orderNumber)
+            if (currentAnswer) {
+                updatedAnswers.set(orderNumber, { ...currentAnswer, answer })
+            }
             return updatedAnswers
         })
     }
@@ -132,15 +315,52 @@ const DoTestPage: React.FC = () => {
         return null
     }
 
+    const customHeader = (
+        <div className="flex align-items-center gap-2">
+            <h3 className="font-bold">Answer Sheet</h3>
+        </div>
+    )
+
     return (
         <UserLayout>
             <Suspense fallback={<ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />}>
+                <Toast ref={toast} />
+                <Sidebar
+                    header={customHeader}
+                    visible={ansSheetVisible}
+                    onHide={() => setAnsSheetVisible(false)}
+                    className="w-full md:w-20rem lg:w-30rem">
+                    <ScrollPanel>
+                        <Divider />
+                        <h4>Note</h4>
+                        <div className="flex">
+                            <div className="test-questions-listitem no-hover" style={{ cursor: "default", pointerEvents: "none" }}>1</div>
+                            : Not answerd
+                        </div>
+                        <div className="flex">
+                            <div className="test-questions-listitem done" style={{ cursor: "default" }}>1</div>
+                            : Done
+                        </div>
+                        <div className="flex">
+                            <div className="test-questions-listitem marked" style={{ cursor: "default" }}>1</div>
+                            : Marked
+                        </div>
+                        <Divider />
+                        {renderAnswerSheet()}
+                    </ScrollPanel>
+                </Sidebar>
                 <Toolbar
                     className="m-2"
+                    start={<Button label="Answer sheet" onClick={() => setAnsSheetVisible(true)} />}
                     center={
-                        <DurationCountdown duration={duration} onTimeUp={() => handleSubmitTest()} />
+                        <div className="flex">
+                            <DurationCountdown duration={duration} onTimeUp={() => handleSubmitTest()} />
+
+                        </div>
                     }
+                    end={<Button outlined className="ml-3" label="Nộp bài"></Button>}
                 />
+                {currentIndex == 0 && renderListeningTestDirections()}
                 {renderItem(currentDisplayTestItem)}
 
                 {!isListeningSection && (

@@ -32,7 +32,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     const MenuItems = () => (
         <ul className="list-none p-0 m-0 flex lg:align-items-center select-none flex-column lg:flex-row z-5">
             <MenuItem icon="pi pi-home" label="Home" url="/home" />
-            <MenuItem icon="pi pi-calendar" label="Calendar" url="" />
+            <MenuItem icon="pi pi-calendar" label="Đề thi online" url="" />
             <MenuItem icon="pi pi-chart-line" label="Stats" url="" />
         </ul>
     )
@@ -51,7 +51,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     const UserAvatar = () => (
         <div className="flex align-items-center gap-2">
             {
-                isAuthenticated ? <AvatarHeader /> : <Button label='Đăng nhập' severity="secondary" icon="pi pi-sign-in" onClick={() => { navigate('/login') }} />
+                isAuthenticated ? <AvatarHeader /> : <Button label='Đăng nhập' rounded severity="secondary" onClick={() => { navigate('/login') }} />
             }
         </div>
     )

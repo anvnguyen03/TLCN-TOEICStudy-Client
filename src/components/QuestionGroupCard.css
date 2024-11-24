@@ -1,0 +1,29 @@
+.scrollpanel .p-scrollpanel.custombar1 .p-scrollpanel-wrapper {
+    border-right: 10px solid var(--surface-ground);
+}
+
+.scrollpanel .p-scrollpanel.custombar1 .p-scrollpanel-bar {
+    background-color: var(--primary-300);
+    opacity: 1;
+    transition: background-color .3s;
+}
+
+.scrollpanel .p-scrollpanel.custombar1 .p-scrollpanel-bar:hover {
+    background-color: var(--primary-400);
+}
+
+.scrollpanel .p-scrollpanel.custombar2 .p-scrollpanel-wrapper {
+    border-right: 10px solid var(--surface-50);
+    border-bottom: 10px solid var(--surface-50);
+}
+
+.scrollpanel .p-scrollpanel.custombar2 .p-scrollpanel-bar {
+    background-color: var(--surface-300);
+    border-radius: 0;
+    opacity: 1;
+    transition: background-color .3s;
+}
+
+.scrollpanel .col-12 {
+    padding: 2rem;
+}

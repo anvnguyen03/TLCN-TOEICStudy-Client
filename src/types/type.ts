@@ -77,8 +77,10 @@ export type UserAnswerSheet = Map<OrderNumber, UserAnswer>
 export type OrderNumber = number
 
 export type UserAnswer = {
+    displayItemIndex: number
     questionId: number
     answer?: string
+    isMarked: boolean
 }
 
 // type for RadioButton
