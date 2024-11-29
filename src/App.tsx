@@ -10,9 +10,10 @@ import Dashboard from './pages/dashboard/dashboard'
 import { useEffect } from 'react'
 import { useAppDispatch } from './hooks/reduxHooks'
 import { fetchAccount } from './store/authSlice'
-import FullTestSimulation from './pages/test/FullTestSimulation'
-import TestResult from './pages/test/TestResult'
+import FullTestSimulation from './pages/do-test/FullTestSimulation'
+import TestResult from './pages/do-test/TestResult'
 import UnauthorizedAccess from './pages/UnauthoriziedAccess'
+import TestsPage from './pages/tests/TestsPage'
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
         <Route path='/register/verify' element={<VerifyPage />} />
         <Route path='/login' element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/tests" element={<TestsPage />} />
 
         {/* Protected Routes for Users */}
         <Route path="/test/:id/:title/exam-simulation/start" element={<FullTestSimulation />} />

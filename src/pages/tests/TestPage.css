@@ -1,0 +1,40 @@
+.col-20 {
+    flex: 0 0 20%;
+    max-width: 20%;
+}
+
+.testitem-wrapper {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: .65rem;
+    position: relative;
+    padding-bottom: 3.2rem;
+    cursor: pointer;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 0 0 rgba(143, 156, 173, .2);
+    background-color: #fff;
+}
+
+.testitem-wrapper:hover {
+    box-shadow: 0 1px 2px 0 rgba(60, 64, 67, .2), 0 2px 6px 2px rgba(60, 64, 67, .15);
+    transform: translateY(-2px);
+    transition: all .4s;
+}
+
+.testitem-start-test {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+}
+
+.testitem-info {
+    display: inline-block;
+    font-size: .9rem;
+    color: #677788;
+    font-weight: 550;
+    line-height: 1.4;
+}
