@@ -32,8 +32,8 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     const MenuItems = () => (
         <ul className="list-none p-0 m-0 flex lg:align-items-center select-none flex-column lg:flex-row z-5">
             <MenuItem icon="pi pi-home" label="Home" url="/home" />
-            <MenuItem icon="pi pi-calendar" label="Đề thi online" url="" />
-            <MenuItem icon="pi pi-chart-line" label="Stats" url="" />
+            <MenuItem icon="pi pi-graduation-cap" label="Đề thi online" url="/tests" />
+            <MenuItem icon="pi pi-clipboard" label="Luyện tập" url="/practices" />
         </ul>
     )
 
