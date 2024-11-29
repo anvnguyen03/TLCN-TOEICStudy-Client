@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { DisplayTestItemDTO, ETestItemType } from "../types/type"
-import { callGetDisplayTestItems } from "../services/TestService"
+import { callGetDisplayTestItems } from "../services/DoTestService"
 import { PART_1_DIRECTIONS, PART_2_DIRECTIONS, PART_3_DIRECTIONS, PART_4_DIRECTIONS, PART_5_DIRECTIONS, PART_6_DIRECTIONS, PART_7_DIRECTIONS } from "../constant/StaticPartDirections"
 
 export const useTestItem = (testId: number) => {

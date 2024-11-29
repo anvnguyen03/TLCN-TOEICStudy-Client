@@ -21,7 +21,7 @@ const HomePage = () => {
             </div>
             }
             <p>daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
-            <Link to={"/test/1/start"}>Start</Link>
+            <Link to={"/test/4/Practice-Test/exam-simulation/start"}>Start</Link>
             </div>
         </UserLayout>
     )

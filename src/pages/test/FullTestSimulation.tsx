@@ -1,23 +1,31 @@
 import React, { Suspense, useEffect, useRef, useState } from "react"
-import { UserLayout } from "../../layouts/user layouts/Userlayout"
-import { DisplayTestItemDTO, ETestItemType, OrderNumber, UserAnswer, UserAnswerSheet } from "../../types/type.ts"
-import { useTestItem } from "../../hooks/testHooks"
-import { useParams } from "react-router-dom"
+import { UserLayout } from "../../layouts/user layouts/Userlayout.tsx"
+import { DisplayTestItemDTO, ETestItemType, ETestMode, OrderNumber, SubmitAnswer, SubmitFullTestRequest, UserAnswer, UserAnswerSheet } from "../../types/type.ts"
+import { useTestItem } from "../../hooks/testHooks.tsx"
+import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { Toolbar } from "primereact/toolbar"
 import { renderListeningTestDirections, renderPart, renderQuestion, renderQuestionGroup } from "../../utils/RenderTestItem.tsx"
 import { Sidebar } from "primereact/sidebar"
-import "./do-test.css"
+import "./FullTestSimulation.css"
 import { ScrollPanel } from "primereact/scrollpanel"
 import { Divider } from "primereact/divider"
 import { Toast } from "primereact/toast"
+import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog"
+import LoadingOverlay from "../../components/LoadingOverlay.tsx"
+import { callSubmitFullTest } from "../../services/DoTestService.tsx"
+import { useAppSelector } from "../../hooks/reduxHooks.tsx"
+import DurationCountdown from "../../components/DurationCountdown.tsx"
 
-const DoTestPage: React.FC = () => {
+const FullTestSimulation: React.FC = () => {
 
     const toast = useRef<Toast>(null)
+    const navigate = useNavigate()
+    const countdownRef = useRef<{ getTimeLeft: () => number; stopTimer: () => void } | null>(null)
     const audioSrc = "/Practice_Set_TOEIC_Test 1.mp3"
 
+    const [loading, setLoading] = useState<boolean>(false)
     const duration = 120 // minute
     const { id } = useParams<{ id: string }>()  // tham số kiểu string theo mặc định
     const testId = Number(id)   // ép kiểu về number
@@ -31,6 +39,7 @@ const DoTestPage: React.FC = () => {
         return audioElement
     })
     const [ansSheetVisible, setAnsSheetVisible] = useState<boolean>(false)    // set visible of answer list
+    const userEmail = useAppSelector(state => state.auth.email)
 
     // Hàm hỗ trợ lấy partNum của DisplayTestItemDTO
     const getPartNum = (item: DisplayTestItemDTO): number | undefined => {
@@ -122,7 +131,7 @@ const DoTestPage: React.FC = () => {
 
     // Xử lý chuyển tiếp thủ công cho Reading test
     const handleNextReadingItem = () => {
-        console.log("Submitting answer: ", Array.from(userAnswerSheet.entries()))  // chuyển Map thành mảng cho dễ nhìn
+        // console.log("Submitting answer: ", Array.from(userAnswerSheet.entries()))  // chuyển Map thành mảng cho dễ nhìn
         if (!isListeningSection && currentIndex < displayTestItems.length - 1) {
             /**
              *  Gọi setSate liên tiếp trong cùng 1 hàm/ eventHandler => React không re-render ngay
@@ -179,7 +188,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 style={{ cursor: 'default' }}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -194,7 +203,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 style={{ cursor: 'default' }}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -209,7 +218,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 style={{ cursor: 'default' }}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -224,7 +233,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 style={{ cursor: 'default' }}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -239,7 +248,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -254,7 +263,7 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
@@ -269,13 +278,28 @@ const DoTestPage: React.FC = () => {
                                 className={`test-questions-listitem ${answer[1].answer && 'done'} ${answer[1].isMarked && 'marked'}`}
                                 onClick={() => handleAnswerSheetItemClick(answer[1].displayItemIndex)}
                             >
-                                {answer[1].questionId}
+                                {answer[0]}
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
         )
+    }
+
+    const submitDialog = () => {
+        confirmDialog({
+            message: (
+                <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
+                    <i className="pi pi-exclamation-circle text-6xl text-primary-500"></i>
+                    <span>Are you sure you want to submit?</span>
+                    <span>Check your <a onClick={() => setAnsSheetVisible(true)} href="#">answer sheet</a> carefully before proceed</span>
+                </div>
+            ),
+            header: 'Confirmination',
+            defaultFocus: 'accept',
+            accept: handleSubmitTest
+        })
     }
 
     const handleMarkQuestion = (orderNumber: number) => {
@@ -311,8 +335,31 @@ const DoTestPage: React.FC = () => {
         })
     }
 
-    const handleSubmitTest = () => {
-        return null
+    const handleSubmitTest = async () => {
+        setLoading(true)
+        const submitAnswers: SubmitAnswer[] = []
+        userAnswerSheet.forEach((userAnswer) => {
+            submitAnswers.push({
+                questionId: userAnswer.questionId,
+                answer: userAnswer.answer ?? null
+            })
+        })
+        // console.table(submitAnswers)
+        const timeLeft = countdownRef.current!.getTimeLeft()
+        countdownRef.current?.stopTimer()
+        const submitRequest: SubmitFullTestRequest = {
+            email: userEmail || '',
+            testId: testId,
+            testMode: ETestMode.SIMULATION,
+            completionTime: duration * 60 - timeLeft,
+            userAnswers: submitAnswers
+        }
+        const response = await callSubmitFullTest(submitRequest)
+        console.log('response: ' + response)
+        if (response.data) {
+            navigate(`/test/${testId}/results/${response.data.id}`)
+            setLoading(false)
+        }
     }
 
     const customHeader = (
@@ -323,8 +370,10 @@ const DoTestPage: React.FC = () => {
 
     return (
         <UserLayout>
+            <LoadingOverlay visible={loading} />
             <Suspense fallback={<ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />}>
                 <Toast ref={toast} />
+                <ConfirmDialog />
                 <Sidebar
                     header={customHeader}
                     visible={ansSheetVisible}
@@ -351,22 +400,24 @@ const DoTestPage: React.FC = () => {
                 </Sidebar>
                 <Toolbar
                     className="m-2"
-                    start={<Button label="Answer sheet" onClick={() => setAnsSheetVisible(true)} />}
+                    start={<Button raised label="Answer sheet" onClick={() => setAnsSheetVisible(true)} />}
                     center={
                         <div className="flex">
-                            <DurationCountdown duration={duration} onTimeUp={() => handleSubmitTest()} />
-
+                            <DurationCountdown
+                                ref={countdownRef}  // Truyền ref vào component con
+                                duration={duration}
+                                onTimeUp={() => handleSubmitTest()} />
                         </div>
                     }
-                    end={<Button outlined className="ml-3" label="Nộp bài"></Button>}
+                    end={<Button raised onClick={submitDialog} outlined className="ml-3" label="Nộp bài"></Button>}
                 />
                 {currentIndex == 0 && renderListeningTestDirections()}
                 {renderItem(currentDisplayTestItem)}
 
                 {!isListeningSection && (
-                    <div className="card flex flex-wrap justify-content-center gap-3 mt-3">
-                        <Button icon='pi pi-angle-left' onClick={handlePreviousReadingItem} visible={currentIndex > listeningItems.length} />
-                        <Button icon='pi pi-angle-right' onClick={handleNextReadingItem} visible={currentIndex < displayTestItems.length - 1} />
+                    <div className="card flex flex-wrap justify-content-between gap-3 mt-3">
+                        <Button raised icon='pi pi-angle-left' onClick={handlePreviousReadingItem} visible={currentIndex > listeningItems.length} />
+                        <Button raised icon='pi pi-angle-right' onClick={handleNextReadingItem} visible={currentIndex < displayTestItems.length - 1} />
                     </div>
                 )}
             </Suspense>
@@ -374,40 +425,4 @@ const DoTestPage: React.FC = () => {
     )
 }
 
-export default DoTestPage
-
-// ------------------------------------ Sub Components ------------------------------------
-
-// React.memo chỉ re-render khi props truyền vào từ Component cha thay đổi
-const DurationCountdown: React.FC<{ duration: number, onTimeUp(): void }> = React.memo(
-    ({ duration, onTimeUp }) => {
-        const [timeLeftInSecond, setTimeLeftInSecond] = useState<number>(duration * 60)
-
-        useEffect(() => {
-            if (timeLeftInSecond <= 0) {
-                onTimeUp()
-                return
-            }
-
-            const timer = setInterval(() => {
-                setTimeLeftInSecond(prevTime => prevTime - 1)
-            }, 1000)    // 1000 milis
-
-            return () => clearInterval(timer)
-        }, [onTimeUp, timeLeftInSecond])
-
-        const minutes = Math.floor(timeLeftInSecond / 60)
-        const seconds = timeLeftInSecond % 60
-
-        const bgColorClass = timeLeftInSecond <= 300 ? 'bg-red-500' : 'bg-gray-300'  // 5 mins
-
-        return (
-            <div className="text-center flex-1 align-items-center justify-content-center">
-                <h5 className={`px-3 inline py-3 ${bgColorClass} border-round-md`}>
-                    {minutes} phút {seconds < 10 ? `0${seconds}` : seconds} giây
-                </h5>
-            </div>
-        )
-    }
-)
-
+export default FullTestSimulation

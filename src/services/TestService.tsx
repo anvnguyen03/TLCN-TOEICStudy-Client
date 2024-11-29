@@ -1,9 +1,9 @@
-import { ApiResponse, DisplayTestItemDTO } from '../types/type'
+import { ApiResponse, UserResultDTO } from '../types/type'
 import apiClient from './AxiosAuthInterceptor'
 
-const baseURL = '/do-test'
+const baseURL = '/test'
 
-export const callGetDisplayTestItems = async (testId: number): Promise<ApiResponse<DisplayTestItemDTO[]>> => {
-    const response = await apiClient.get<ApiResponse<DisplayTestItemDTO[]>>(`${baseURL}/${testId}/get-test-items`)
+export const callGetUserResult = async (resultId: number): Promise<ApiResponse<UserResultDTO>> => {
+    const response = await apiClient.get<ApiResponse<UserResultDTO>>(`${baseURL}/results/${resultId}`)
     return response.data
 }

@@ -70,7 +70,54 @@ export type QuestionDTO = {
     audio?: string
     startTimestamp?: number
 }
-// ---------------------------------------------------------------
+
+export type ReviewQuestionDTO = {
+    id: number
+    partNum: number
+    orderNumber: number
+    content?: string
+    answer1: string
+    answer2: string
+    answer3: string
+    answer4?: string
+    images?: string[]
+    groupContent?: string
+    audio?: string
+    startTimestamp?: number
+
+    correctAnswer: string
+    transcript: string
+}
+
+export type UserResultDTO = {
+    id: number
+    correctAnswers: number
+    incorrectAnswers: number
+    skippedAnswers: number
+    listeningCorrects: number
+    readingCorrects: number
+    listeningScore: number
+    readingScore: number
+    totalScore: number
+    completionTime: number // in seconds
+    accuracy: number
+    completedAt: string
+    attempStatus: string
+    testMode: string
+    userId: number
+    testId: number
+    testTitle: string
+    userAnswers: UserAnswerDTO[]
+}
+
+export type UserAnswerDTO = {
+    id: number
+    userResultId: number
+    selectedAnswer: string
+    correct: boolean
+    question: ReviewQuestionDTO
+}
+// -------------------- Do-Test item type --------------------
 
 export type UserAnswerSheet = Map<OrderNumber, UserAnswer>
 
@@ -87,4 +134,23 @@ export type UserAnswer = {
 export type AnswerOption = {
     name: string
     key: string
+}
+
+// ------------------ type for DTO to send API request ------------------
+export type SubmitAnswer = {
+    questionId: number
+    answer: string | null
+}
+
+export enum ETestMode {
+    SIMULATION = 'SIMULATION',
+    PRACTICE = 'PRACTICE'
+}
+
+export type SubmitFullTestRequest = {
+    email: string
+    testId: number
+    testMode: ETestMode
+    completionTime: number
+    userAnswers: SubmitAnswer[]
 }
