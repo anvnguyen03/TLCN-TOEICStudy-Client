@@ -182,6 +182,7 @@ export type SubmitFullTestRequest = {
 
 export type GetTestInfoPaginRequest = {
     keyword?: string
+    testCategoryId?: number
     page: number
     size: number
 }

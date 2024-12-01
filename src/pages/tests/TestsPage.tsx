@@ -2,7 +2,7 @@ import { Card } from "primereact/card"
 import { UserLayout } from "../../layouts/user layouts/Userlayout"
 import { InputText } from "primereact/inputtext"
 import { Button } from "primereact/button"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import "./TestPage.css"
 import { Chip } from "primereact/chip"
 import { Divider } from "primereact/divider"
@@ -26,6 +26,7 @@ const TestsPage: React.FC = () => {
     const [keyword, setKeyword] = useState<string>('')
     const [tests, setTests] = useState<TestInfoDTO[]>()
     const [categories, setCategories] = useState<TestCategoryDTO[]>()
+    const [currentCateId, setCurrentCateId] = useState<number>(-1)
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         setFirst(event.first)
@@ -35,23 +36,30 @@ const TestsPage: React.FC = () => {
     }
 
     const handleSearch = () => {
-        fetchTestsInfoPaging(0, keyword)
+        fetchTestsInfoPaging(0, keyword, currentCateId)
     }
 
     const handleAllClick = () => {
+        setCurrentCateId(-1)
         setKeyword('')
         setCurrentPageIndex(currentPageIndex)
         fetchTestsInfoPaging(0, '')
         navigate('/tests')
     }
 
-    const fetchTestsInfoPaging = async (pageIndex: number, keyword: string) => {
+    const handleCategoryClick = (cateId: number) => {
+        setCurrentCateId(cateId)
+        fetchTestsInfoPaging(0, '', cateId)
+    }
+
+    const fetchTestsInfoPaging = async (pageIndex: number, keyword: string, testCategoryId?: number) => {
         try {
             setLoading(true)
             const request: GetTestInfoPaginRequest = {
                 page: pageIndex,
                 size: rows,
-                keyword: keyword
+                keyword: keyword,
+                testCategoryId: testCategoryId
             }
             const response = await callGetTestInfoPaging(request)
             if (response.data) {
@@ -93,9 +101,12 @@ const TestsPage: React.FC = () => {
                     <Button icon="pi pi-search" outlined raised severity="contrast" className="p-button-info" onClick={() => handleSearch()} />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <Button label="All" rounded raised outlined severity="contrast" size="small" onClick={() => handleAllClick()} />
+                    <Button label="All" rounded raised outlined={currentCateId !== -1} severity="contrast" size="small" onClick={() => handleAllClick()} />
                     {categories && (categories.map((category, index) => (
-                        <Button key={`category-${index}`} label={category.name} rounded raised outlined severity="contrast" size="small" />
+                        <Button key={`category-${index}`} label={category.name}
+                            rounded raised outlined={currentCateId !== category.id} severity="contrast" size="small"
+                            onClick={() => handleCategoryClick(category.id)}
+                        />
                     )))}
                 </div>
             </Card>

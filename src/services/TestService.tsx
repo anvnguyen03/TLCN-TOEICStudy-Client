@@ -4,10 +4,11 @@ import apiClient from './AxiosAuthInterceptor'
 const baseURL = '/test'
 
 export const callGetTestInfoPaging = async (request: GetTestInfoPaginRequest): Promise<ApiResponse<TestInfoPagingDTO>> => {
-    const { keyword, page, size } = request
+    const { keyword, page, size, testCategoryId } = request
     const response = await apiClient.get<ApiResponse<TestInfoPagingDTO>>(`${baseURL}/all-published`, {
         params: {
             keyword,    // tự động bỏ qua nếu là undefined
+            testCategoryId,
             page,
             size
         }
