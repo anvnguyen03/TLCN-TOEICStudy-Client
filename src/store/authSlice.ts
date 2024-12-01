@@ -80,6 +80,7 @@ const authSlice = createSlice({
         })
 
         builder.addCase(fetchAccount.rejected, (state, action) => {
+            localStorage.removeItem('token')
             if (action.payload) {
                 state.isAuthenticated = false
             }

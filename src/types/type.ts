@@ -12,12 +12,32 @@ export interface IFetchAccount {
 }
 
 // ------------------ type for DTO got from API response ------------------
+export enum ETestStatus {
+    DRAFT = 'DRAFT',
+	PUBLISHED = 'PUBLISHED',
+	INACTIVE = 'INACTIVE'
+}
+
 export type TestInfoDTO = {
     id: number
-    title: string
-    totalQuestions: number
-    duration: number
-    listeningAudio: string
+	title: string
+	duration: number
+	totalAttemps: number
+	totalComments: number
+	totalParts: number
+	totalQuestions: number
+	testCategory: string
+	listeningAudio: string
+	status: ETestStatus
+	isUserAttemped: boolean
+}
+
+export type TestInfoPagingDTO = {
+    tests: TestInfoDTO[]
+    totalPages: number
+    totalElements: number
+    currentPageIndex: number
+    numberOfElements: number
 }
 
 export enum ETestItemType {
@@ -153,4 +173,10 @@ export type SubmitFullTestRequest = {
     testMode: ETestMode
     completionTime: number
     userAnswers: SubmitAnswer[]
+}
+
+export type GetTestInfoPaginRequest = {
+    keyword?: string
+    page: number
+    size: number
 }
