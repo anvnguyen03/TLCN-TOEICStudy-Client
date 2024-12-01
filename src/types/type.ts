@@ -137,6 +137,11 @@ export type UserAnswerDTO = {
     correct: boolean
     question: ReviewQuestionDTO
 }
+
+export type TestCategoryDTO = {
+    id: number
+    name: string
+}
 // -------------------- Do-Test item type --------------------
 
 export type UserAnswerSheet = Map<OrderNumber, UserAnswer>

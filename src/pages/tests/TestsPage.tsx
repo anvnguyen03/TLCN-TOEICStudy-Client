@@ -9,9 +9,10 @@ import { Divider } from "primereact/divider"
 import { Paginator, PaginatorPageChangeEvent } from "primereact/paginator"
 import { useEffect, useRef, useState } from "react"
 import { callGetTestInfoPaging } from "../../services/TestService"
-import { GetTestInfoPaginRequest, TestInfoDTO } from "../../types/type"
+import { GetTestInfoPaginRequest, TestCategoryDTO, TestInfoDTO } from "../../types/type"
 import { Toast } from "primereact/toast"
 import { ProgressSpinner } from "primereact/progressspinner"
+import { callGetAllTestCategories } from "../../services/TestCategoryService"
 
 const TestsPage: React.FC = () => {
 
@@ -24,6 +25,7 @@ const TestsPage: React.FC = () => {
     const [totalRecords, setTotalRecords] = useState<number>(0)
     const [keyword, setKeyword] = useState<string>('')
     const [tests, setTests] = useState<TestInfoDTO[]>()
+    const [categories, setCategories] = useState<TestCategoryDTO[]>()
 
     const onPageChange = (event: PaginatorPageChangeEvent) => {
         setFirst(event.first)
@@ -65,6 +67,16 @@ const TestsPage: React.FC = () => {
     }
 
     useEffect(() => {
+        const fetchAllTestCategories = async () => {
+            const response = await callGetAllTestCategories()
+            if (response.data) {
+                setCategories(response.data)
+            }
+        }
+        fetchAllTestCategories()
+    }, [])
+
+    useEffect(() => {
         fetchTestsInfoPaging(currentPageIndex, '')
     }, [])
 
@@ -80,7 +92,12 @@ const TestsPage: React.FC = () => {
                     <InputText placeholder="Keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
                     <Button icon="pi pi-search" outlined raised severity="contrast" className="p-button-info" onClick={() => handleSearch()} />
                 </div>
-                <Button label="All" rounded raised outlined severity="contrast" size="small" onClick={() => handleAllClick()} />
+                <div className="flex flex-wrap gap-2">
+                    <Button label="All" rounded raised outlined severity="contrast" size="small" onClick={() => handleAllClick()} />
+                    {categories && (categories.map((category, index) => (
+                        <Button key={`category-${index}`} label={category.name} rounded raised outlined severity="contrast" size="small" />
+                    )))}
+                </div>
             </Card>
             <div className="flex flex-wrap mb-3" style={{ fontFamily: 'sans-serif' }}>
                 {loading && <ProgressSpinner />}
