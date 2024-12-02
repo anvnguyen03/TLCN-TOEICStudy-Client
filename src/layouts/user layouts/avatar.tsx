@@ -14,6 +14,7 @@ const AvatarHeader: React.FC = () => {
 
     const handleLogout = () => {
         dispatch(logout())
+        window.location.reload()
     }
 
     const items: MenuItem[] = [

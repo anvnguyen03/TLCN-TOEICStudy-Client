@@ -1,0 +1,11 @@
+.contentblock {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: .65rem;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 0 0 rgba(143, 156, 173, .2);
+}
+
+.nav-link {
+    text-decoration: none;    
+}

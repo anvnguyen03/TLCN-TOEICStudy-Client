@@ -1,4 +1,4 @@
-import { ApiResponse, GetTestInfoPaginRequest, TestInfoPagingDTO, UserResultDTO } from '../types/type'
+import { ApiResponse, GetTestInfoPaginRequest, TestInfoDTO, TestInfoPagingDTO, UserResultDTO } from '../types/type'
 import apiClient from './AxiosAuthInterceptor'
 
 const baseURL = '/test'
@@ -13,6 +13,16 @@ export const callGetTestInfoPaging = async (request: GetTestInfoPaginRequest): P
             size
         }
     })
+    return response.data
+}
+
+export const callGetTestInfo = async (testId: number): Promise<ApiResponse<TestInfoDTO>> => {
+    const response = await apiClient.get<ApiResponse<TestInfoDTO>>(`${baseURL}/${testId}/info`)
+    return response.data
+}
+
+export const callGetUserResultsForUser = async (testId: number): Promise<ApiResponse<UserResultDTO[]>> => {
+    const response = await apiClient.get<ApiResponse<UserResultDTO[]>>(`${baseURL}/${testId}/results`)
     return response.data
 }
 

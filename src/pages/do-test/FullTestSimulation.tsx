@@ -31,7 +31,7 @@ const FullTestSimulation: React.FC = () => {
     const testId = Number(id)   // ép kiểu về number
     const displayTestItems: DisplayTestItemDTO[] = useTestItem(testId)
     const [currentDisplayTestItem, setCurrentDisplayTestItem] = useState<DisplayTestItemDTO>()
-    const [currentIndex, setCurrentIndex] = useState(60) // index của displayTestItems
+    const [currentIndex, setCurrentIndex] = useState(0) // index của displayTestItems
     const [userAnswerSheet, setUserAnswerSheet] = useState<UserAnswerSheet>(new Map<OrderNumber, UserAnswer>)
     const [audio] = useState(() => {
         const audioElement = new Audio(audioSrc)

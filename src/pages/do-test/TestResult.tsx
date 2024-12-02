@@ -13,6 +13,8 @@ import { Dialog } from "primereact/dialog"
 import { Inplace, InplaceContent, InplaceDisplay } from "primereact/inplace"
 import ReactMarkdown from 'react-markdown'
 import { RadioButton } from "primereact/radiobutton"
+import { formatForUrl } from "../../utils/FormatForUrl"
+import { Chip } from "primereact/chip"
 
 const TestResult: React.FC = () => {
 
@@ -27,11 +29,11 @@ const TestResult: React.FC = () => {
     const getSeverity = (status: string) => {
         switch (status) {
             case ETestMode.SIMULATION:
-                return 'info'
+                return 'warning'
             case ETestMode.PRACTICE:
-                return 'contrast'
+                return 'success'
             default:
-                return null
+                return 'success'
         }
     }
 
@@ -223,14 +225,14 @@ const TestResult: React.FC = () => {
                                     className="w-full justify-content-start"
                                     text="Chú ý: Bạn có thể tạo flashcards từ highlights (bao gồm các highlights các bạn đã tạo trước đây) trong trang chi tiết kết quả bài thi." />
                                 <br />
+                                <Chip label="#Full Test" style={{ fontSize: 'small' }} className="mt-4" />
                                 <h2 className="mb-3 text-black-alpha-90">
                                     Kết quả: {userResult?.testTitle}
-                                    <Tag severity="success" value="Full test" className="ml-2" rounded></Tag>
                                     <Tag severity={getSeverity(userResult?.testMode)} value={userResult?.testMode} className="ml-2" rounded></Tag>
                                 </h2>
 
                                 <div className="mb-3">
-                                    <Button size="small" label="Quay về trang đề thi" />
+                                    <Button size="small" label="Quay về trang đề thi" onClick={() => navigate(`/tests/${userResult.testId}/${formatForUrl(userResult.testTitle)}`)}/>
                                 </div>
 
                                 <div className="result-score-details">

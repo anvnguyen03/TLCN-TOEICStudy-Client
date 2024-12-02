@@ -2,7 +2,7 @@ import { Card } from "primereact/card"
 import { UserLayout } from "../../layouts/user layouts/Userlayout"
 import { InputText } from "primereact/inputtext"
 import { Button } from "primereact/button"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import "./TestPage.css"
 import { Chip } from "primereact/chip"
 import { Divider } from "primereact/divider"
@@ -13,6 +13,7 @@ import { GetTestInfoPaginRequest, TestCategoryDTO, TestInfoDTO } from "../../typ
 import { Toast } from "primereact/toast"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { callGetAllTestCategories } from "../../services/TestCategoryService"
+import { formatForUrl } from "../../utils/FormatForUrl"
 
 const TestsPage: React.FC = () => {
 
@@ -74,6 +75,11 @@ const TestsPage: React.FC = () => {
         }
     }
 
+    const handleTestClick = (test: TestInfoDTO) => {
+        // console.log('clicked')
+        navigate(`/tests/${test.id}/${formatForUrl(test.title)}`)
+    }
+
     useEffect(() => {
         const fetchAllTestCategories = async () => {
             const response = await callGetAllTestCategories()
@@ -115,7 +121,7 @@ const TestsPage: React.FC = () => {
                 {tests && tests.length > 0 ? (tests.map((test, index) => (
                     <div key={index} className="col-20 pr-3 pl-3">
                         <div className="testitem-wrapper">
-                            <a className="text-900 mb-3" href="" style={{ textDecoration: 'none' }}>
+                            <a className="text-900 mb-3" href={`/tests/${test.id}/${formatForUrl(test.title)}`} style={{ textDecoration: 'none' }}>
                                 <h2 className="mb-1 overflow-hidden" style={{ fontSize: '1rem' }}>
                                     {test.isUserAttemped && (<span className="pi pi-verified text-green-400 mr-1"></span>)}
                                     {test.title}
@@ -139,9 +145,9 @@ const TestsPage: React.FC = () => {
                                 <Divider />
                             </a>
                             {test.isUserAttemped ? (<div className="testitem-start-test mt-2">
-                                <Button label="Xem kết quả" severity="contrast" raised outlined className="w-full" />
+                                <Button label="Xem kết quả" severity="contrast" raised outlined className="w-full" onClick={() => handleTestClick(test)} />
                             </div>) : (
-                                <Button label="Chi tiết" severity="info" raised outlined className="w-full" />
+                                <Button label="Chi tiết" severity="info" raised outlined className="w-full" onClick={() => handleTestClick(test)} />
                             )}
                         </div>
                     </div>))) : (
