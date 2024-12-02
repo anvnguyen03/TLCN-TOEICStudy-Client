@@ -5,7 +5,7 @@ import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AppDispatch } from "../../store/store";
 import withReactContent from "sweetalert2-react-content";
 import Swal from "sweetalert2";
@@ -23,6 +23,7 @@ interface FormData {
 export default function LoginPage() {
 
     const navigate = useNavigate()
+    const location = useLocation()
     const dispatch = useDispatch<AppDispatch>()
     const [form, setForm] = useState<FormData>({ email: '', password: '' })
     const [isValidForm, setValidForm] = useState(false)
@@ -31,9 +32,14 @@ export default function LoginPage() {
     const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
 
     useEffect(() => {
-        
+        const from = location.state?.from
+
         if (isAuthenticated) {
-            navigate('/home')
+            if (from) {
+                navigate(from)
+            } else {
+                navigate('/home')
+            }
         }
 
         const isValid = validateForm()
@@ -75,14 +81,21 @@ export default function LoginPage() {
             fireLoading()
             const response = await callLogin(form)
             MySwal.close()
-            
+
             const { token, refreshToken } = response.data
 
             // Dispatch login action to Redux store
             dispatch(login({ token, refreshToken }))
             fireLoggedInToast()
-            navigate('/home')
-            
+
+            // Kiểm tra xem có route trước đó trong state hay không
+            const from = location.state?.from
+
+            if (from) {
+                navigate(from)
+            } else {
+                navigate('/home')
+            }
 
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse<any>>
