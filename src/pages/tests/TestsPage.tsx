@@ -37,7 +37,11 @@ const TestsPage: React.FC = () => {
     }
 
     const handleSearch = () => {
-        fetchTestsInfoPaging(0, keyword, currentCateId)
+        if (currentCateId === -1) {
+            fetchTestsInfoPaging(0, keyword)
+        } else {
+            fetchTestsInfoPaging(0, keyword, currentCateId)
+        }
     }
 
     const handleAllClick = () => {
