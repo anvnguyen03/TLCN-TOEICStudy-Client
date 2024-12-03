@@ -73,6 +73,10 @@ const TestDetailsPage: React.FC = () => {
         navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/simulation/start`)
     }
 
+    const handleStartPracticeTest = () => {
+        navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/practice/start`)
+    }
+
     const fetchUserResults = async (testId: number) => {
         const response = await callGetUserResultsForUser(testId)
         if (response.data) {
@@ -158,13 +162,13 @@ const TestDetailsPage: React.FC = () => {
                                     <Message severity="warn" text="Mô phỏng quy trình thi thật trên máy, bạn không thể tua audio Listening cũng như các câu hỏi một cách tự do. 
                                     Hãy đảm bảo bạn dành 120 phút để hoàn thành bài thi một cách hiệu quả nhất." icon="pi pi-info-circle" />
                                     <div className="mt-3">
-                                        <Button label="Bắt đầu thi" raised onClick={() => handleStartSimulationTest()}/>
+                                        <Button label="Bắt đầu thi" raised onClick={() => handleStartSimulationTest()} severity="warning"/>
                                     </div>
                                 </TabPanel>
                                 <TabPanel header='Practice'>
                                     <Message severity="success" text="Hình thức luyện tập, có thể tua audio của Listening test, đồng thời xem trước toàn bộ đề như kì thi trên giấy" icon="pi pi-lightbulb" />
                                     <div className="mt-3">
-                                        <Button label="Bắt đầu thi" raised />
+                                        <Button label="Bắt đầu thi" raised onClick={() => handleStartPracticeTest()} severity="success"/>
                                     </div>
                                 </TabPanel>
                             </TabView>

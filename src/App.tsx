@@ -16,6 +16,7 @@ import UnauthorizedAccess from './pages/UnauthoriziedAccess'
 import TestsPage from './pages/tests/TestsPage'
 import TestDetailsPage from './pages/tests/TestDetailsPage'
 import ScrollToTop from './components/ScrollToTop'
+import FullTestPractice from './pages/do-test/FullTestPractice'
 
 function App() {
 
@@ -40,6 +41,7 @@ function App() {
 
         {/* Protected Routes for Users */}
         <Route path="/test/:id/:title/simulation/start" element={<FullTestSimulation />} />
+        <Route path="/test/:id/:title/practice/start" element={<FullTestPractice />} />
         <Route path="/test/:testIdParam/results/:resultIdParam" element={<TestResult />} />
 
         {/* Protected Routes for Admin */}

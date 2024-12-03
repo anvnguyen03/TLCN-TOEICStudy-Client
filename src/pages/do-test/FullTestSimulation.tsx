@@ -17,6 +17,7 @@ import LoadingOverlay from "../../components/LoadingOverlay.tsx"
 import { callSubmitFullTest } from "../../services/DoTestService.tsx"
 import { useAppSelector } from "../../hooks/reduxHooks.tsx"
 import DurationCountdown from "../../components/DurationCountdown.tsx"
+import usePreventNavigation from "../../components/usePreventNavigation.tsx"
 
 const FullTestSimulation: React.FC = () => {
 
@@ -67,6 +68,8 @@ const FullTestSimulation: React.FC = () => {
     // })
 
     const isListeningSection = currentIndex < listeningItems.length
+
+    usePreventNavigation()
 
     useEffect(() => {
         // Phát audio nếu nó đang tạm dừng
