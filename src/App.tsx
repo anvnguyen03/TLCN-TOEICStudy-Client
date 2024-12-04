@@ -32,17 +32,22 @@ function App() {
       <Routes>
         <Route path='/' element={<Navigate to='/home' />} />
         <Route path="/unauthorized" element={<UnauthorizedAccess />} />
-        <Route path='/register' element={<RegisterPage />} />
-        <Route path='/register/verify' element={<VerifyPage />} />
-        <Route path='/login' element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/tests" element={<TestsPage />} />
         <Route path="/tests/:testIdParam/:testTitle" element={<TestDetailsPage />} />
 
+        <Route element={<ProtectedRoute allowedRoles={[]} redirectIfAuthenticated="/home" />}>
+          <Route path='/register' element={<RegisterPage />} />
+          <Route path='/register/verify' element={<VerifyPage />} />
+          <Route path='/login' element={<LoginPage />} />
+        </Route>
+
         {/* Protected Routes for Users */}
-        <Route path="/test/:id/:title/simulation/start" element={<FullTestSimulation />} />
-        <Route path="/test/:id/:title/practice/start" element={<FullTestPractice />} />
-        <Route path="/test/:testIdParam/results/:resultIdParam" element={<TestResult />} />
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'USER']} />}>
+          <Route path="/test/:id/:title/simulation/start" element={<FullTestSimulation />} />
+          <Route path="/test/:id/:title/practice/start" element={<FullTestPractice />} />
+          <Route path="/test/:testIdParam/results/:resultIdParam" element={<TestResult />} />
+        </Route>
 
         {/* Protected Routes for Admin */}
         <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>

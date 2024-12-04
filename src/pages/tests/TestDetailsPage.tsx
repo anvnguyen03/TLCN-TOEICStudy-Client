@@ -13,6 +13,7 @@ import { callGetTestInfo, callGetUserResultsForUser } from "../../services/TestS
 import { TabPanel, TabView } from "primereact/tabview"
 import { Message } from "primereact/message"
 import { formatForUrl } from "../../utils/FormatForUrl"
+import { useAppSelector } from "../../hooks/reduxHooks"
 
 const TestDetailsPage: React.FC = () => {
 
@@ -22,6 +23,7 @@ const TestDetailsPage: React.FC = () => {
     const [activeTab, setActiveTab] = useState<string>('info')
     const [test, setTest] = useState<TestInfoDTO>()
     const [results, setResults] = useState<UserResultDTO[]>()
+    const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
 
     const getSeverity = (status: string) => {
         switch (status) {
@@ -164,13 +166,19 @@ const TestDetailsPage: React.FC = () => {
                                     <Message severity="warn" text="Mô phỏng quy trình thi thật trên máy, bạn không thể tua audio Listening cũng như các câu hỏi một cách tự do. 
                                     Hãy đảm bảo bạn dành 120 phút để hoàn thành bài thi một cách hiệu quả nhất." icon="pi pi-info-circle" />
                                     <div className="mt-3">
-                                        <Button label="Bắt đầu thi" raised onClick={() => handleStartSimulationTest()} severity="warning"/>
+                                        {isAuthenticated ?
+                                            <Button label="Bắt đầu thi" raised onClick={() => handleStartSimulationTest()} severity="warning" /> :
+                                            <Message severity="error" text="Vui lòng đăng nhập để thực hiện bài thi" />
+                                        }
                                     </div>
                                 </TabPanel>
                                 <TabPanel header='Practice'>
                                     <Message severity="success" text="Hình thức luyện tập, có thể tua audio của Listening test, đồng thời xem trước toàn bộ đề như kì thi trên giấy" icon="pi pi-lightbulb" />
                                     <div className="mt-3">
-                                        <Button label="Bắt đầu thi" raised onClick={() => handleStartPracticeTest()} severity="success"/>
+                                        {isAuthenticated ?
+                                            <Button label="Bắt đầu thi" raised onClick={() => handleStartPracticeTest()} severity="success" /> :
+                                            <Message severity="error" text="Vui lòng đăng nhập để thực hiện bài thi" />
+                                        }
                                     </div>
                                 </TabPanel>
                             </TabView>
