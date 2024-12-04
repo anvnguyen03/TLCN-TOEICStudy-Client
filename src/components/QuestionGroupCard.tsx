@@ -32,7 +32,8 @@ const QuestionGroupCard: React.FC<QuestionGroupCardProps> = ({ questionGroup, on
             }}
         >
             {/* Hiển thị các hình ảnh và đoạn hội thoại có thể cuộn */}
-            <ScrollPanel style={{ width: '100%', height: '500px' }} className="custombar1">
+            {(questionGroup.content || questionGroup.images!.length > 0) && (
+                <ScrollPanel style={{ width: '100%', height: '500px' }} className="custombar1">
                 {questionGroup.images && questionGroup.images.map((img) => (
                     <div key={img.id} className="">
                         <img className="max-w-full max-h-full" src={img.image} alt={`Image for ${questionGroup.name}`} />
@@ -40,6 +41,7 @@ const QuestionGroupCard: React.FC<QuestionGroupCardProps> = ({ questionGroup, on
                 ))}
                 {questionGroup.content && renderGroupContent()}
             </ScrollPanel>
+            )}
 
             {/* Hiển thị các câu hỏi con với 2 cột có thể cuộn */}
             <ScrollPanel style={{ width: '100%', height: '500px' }} className="custombar2">
@@ -48,12 +50,14 @@ const QuestionGroupCard: React.FC<QuestionGroupCardProps> = ({ questionGroup, on
                         {questionGroup.subQuestions.map((question) => (
                             <div key={question.id} className="p-2 border-1 border-round-md">
                                 <div className="flex align-items-center mb-2">
-                                    <strong
-                                        className={`question-number ${userAnswerSheet.get(question.orderNumber)?.isMarked ? 'marked' : ''} mr-2`}
-                                        onClick={() => onMarkQuestion(question.orderNumber)}
-                                    >
-                                        {question.orderNumber}
-                                    </strong>
+                                    <div className="mr-2" style={{ width: '35px' }}>
+                                        <strong
+                                            className={`question-number ${userAnswerSheet.get(question.orderNumber)?.isMarked ? 'marked' : ''} mr-2`}
+                                            onClick={() => onMarkQuestion(question.orderNumber)}
+                                        >
+                                            {question.orderNumber}
+                                        </strong>
+                                    </div>
                                     <p className="mb-2 font-semibold">{question.content}</p>
                                 </div>
                                 <div className="flex flex-column gap-2">
