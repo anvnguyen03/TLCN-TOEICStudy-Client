@@ -6,7 +6,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { Toolbar } from "primereact/toolbar"
-import { renderListeningTestDirections, renderPart, renderQuestion, renderQuestionGroup } from "../../utils/RenderTestItem.tsx"
+import { renderListeningTestDirections, renderPart, renderQuestion, renderQuestionGroup } from "../../utils/RenderTestItemForSimulationMode.tsx"
 import { Sidebar } from "primereact/sidebar"
 import "./FullTestSimulation.css"
 import { ScrollPanel } from "primereact/scrollpanel"
@@ -358,7 +358,6 @@ const FullTestSimulation: React.FC = () => {
             userAnswers: submitAnswers
         }
         const response = await callSubmitFullTest(submitRequest)
-        console.log('response: ' + response)
         if (response.data) {
             navigate(`/test/${testId}/results/${response.data.id}`)
             setLoading(false)

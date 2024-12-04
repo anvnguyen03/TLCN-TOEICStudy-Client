@@ -74,7 +74,9 @@ const TestDetailsPage: React.FC = () => {
     }
 
     const handleStartPracticeTest = () => {
-        navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/practice/start`)
+        navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/practice/start`, {
+            state: { testInfo: test }
+        })
     }
 
     const fetchUserResults = async (testId: number) => {
