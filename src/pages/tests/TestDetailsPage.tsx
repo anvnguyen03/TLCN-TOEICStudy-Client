@@ -14,6 +14,7 @@ import { TabPanel, TabView } from "primereact/tabview"
 import { Message } from "primereact/message"
 import { formatForUrl } from "../../utils/FormatForUrl"
 import { useAppSelector } from "../../hooks/reduxHooks"
+import { InputText } from "primereact/inputtext"
 
 const TestDetailsPage: React.FC = () => {
 
@@ -191,7 +192,11 @@ const TestDetailsPage: React.FC = () => {
             </div>
 
             <div className="contentblock">
-                <h1>Bình luận</h1>
+                <h2 className="">Bình luận</h2>
+                <div className="p-inputgroup flex-1 ">
+                    <InputText placeholder="Keyword" />
+                    <Button label="Gửi" />
+                </div>
             </div>
         </UserLayout>
     )

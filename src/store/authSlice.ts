@@ -18,6 +18,7 @@ interface DecodedToken {
   }
 
 interface AuthState {
+    loading: boolean
     isAuthenticated: boolean
     token: string | null
     refreshToken: string | null
@@ -27,6 +28,7 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
+    loading: false,
     isAuthenticated: false,
     token: null,
     refreshToken: null,
@@ -54,6 +56,7 @@ const authSlice = createSlice({
         },
         logout: (state) => {
             localStorage.removeItem('token')
+            state.loading = false
             state.isAuthenticated = false
             state.token = null
             state.refreshToken = null
@@ -66,12 +69,14 @@ const authSlice = createSlice({
 
         builder.addCase(fetchAccount.pending, (state, action) => {
             if (action.payload) {
+                state.loading = true
                 state.isAuthenticated = false
             }
         })
 
         builder.addCase(fetchAccount.fulfilled, (state, action) => {
             if (action.payload) {
+                state.loading = false
                 state.isAuthenticated = true
                 state.email = action.payload.data.email
                 state.fullname = action.payload.data.fullname
@@ -82,6 +87,7 @@ const authSlice = createSlice({
         builder.addCase(fetchAccount.rejected, (state, action) => {
             localStorage.removeItem('token')
             if (action.payload) {
+                state.loading = false
                 state.isAuthenticated = false
             }
         })

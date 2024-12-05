@@ -29,22 +29,32 @@ export default function LoginPage() {
     const [isValidForm, setValidForm] = useState(false)
     const [errors, setErrors] = useState<Partial<FormData>>({})
     const MySwal = withReactContent(Swal)
-    const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
+    const auth = useAppSelector(state => state.auth)
 
     useEffect(() => {
         const from = location.state?.from
 
-        if (isAuthenticated) {
+        if (auth.isAuthenticated) {
+
+            if (auth.role === 'ADMIN') {
+                navigate('/admin/dashboard')
+                return
+            }
+
             if (from) {
                 navigate(from)
+                return
             } else {
-                navigate('/home')
+                if (auth.role === 'USER') {
+                    navigate('/home')
+                    return
+                }
             }
         }
 
         const isValid = validateForm()
         setValidForm(isValid)
-    }, [form, isAuthenticated])
+    }, [form, auth])
 
     const validateForm = (): boolean => {
         const newErrors: Partial<FormData> = {}
