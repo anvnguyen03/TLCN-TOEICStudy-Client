@@ -19,6 +19,10 @@ import FullTestPractice from './pages/do-test/FullTestPractice'
 import AdminDashboard from './pages/admin/dashboard/AdminDashboard'
 import AdminTest from './pages/admin/online test/AdminTest'
 import AdminAddTest from './pages/admin/online test/AdminAddTest'
+import AdminCategory from './pages/admin/online test/AdminCategory'
+import AdminAccount from './pages/admin/user/AdminAccount'
+import AdminTestResult from './pages/admin/user/AdminTestResult'
+import AddFullTest from './pages/admin/online test/add test/AddFullTest'
 
 function App() {
 
@@ -61,8 +65,13 @@ function App() {
         <Route path='/admin' element={<Navigate to='/admin/dashboard' />} />
         <Route path="admin" element={<Outlet />} >
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="test-category" element={<AdminCategory />} />
           <Route path="test" element={<AdminTest />} />
           <Route path="test/add" element={<AdminAddTest />} />
+          <Route path="test/add/full-test" element={<AddFullTest />} />
+
+          <Route path="user" element={<AdminAccount />} />
+          <Route path="user-result" element={<AdminTestResult />} />
         </Route>
         {/* </Route> */}
       </Routes>

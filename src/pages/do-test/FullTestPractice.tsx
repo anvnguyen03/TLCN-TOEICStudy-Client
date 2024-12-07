@@ -27,7 +27,6 @@ const FullTestPractice: React.FC = () => {
     const [scrollToQNum, setScrollToQNum] = useState<number>()
 
     const countdownRef = useRef<{ getTimeLeft: () => number; stopTimer: () => void } | null>(null)
-    const audioSrc = "/Practice_Set_TOEIC_Test 1.mp3"
     const { id } = useParams<{ id: string }>()
     const testId = Number(id)   // ép kiểu về number
     const displayTestItems: DisplayTestItemDTO[] = useTestItem(testId)
@@ -488,7 +487,7 @@ const FullTestPractice: React.FC = () => {
 
                     <div className="test-content contentblock">
                         <div className="mb-5">
-                            <audio src={audioSrc} controls className="w-full max-w-full"></audio>
+                            <audio src={testInfo.listeningAudio} controls className="w-full max-w-full"></audio>
                         </div>
                         <div className="flex flex-wrap gap-2 mb-4">
                             {partsNum.map((value, index) => (

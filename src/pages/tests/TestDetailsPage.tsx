@@ -73,7 +73,9 @@ const TestDetailsPage: React.FC = () => {
     }
 
     const handleStartSimulationTest = () => {
-        navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/simulation/start`)
+        navigate(`/test/${testIdParam}/${formatForUrl(test!.title)}/simulation/start`, {
+            state: { testInfo: test }
+        })
     }
 
     const handleStartPracticeTest = () => {

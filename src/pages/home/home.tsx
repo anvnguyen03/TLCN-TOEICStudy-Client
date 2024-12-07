@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom"
 import { useAppSelector } from "../../hooks/reduxHooks"
 import { UserLayout } from "../../layouts/user layouts/Userlayout"
 
@@ -17,11 +16,8 @@ const HomePage = () => {
                 <div className="align-items-center hidden lg:flex">
                     <span className="line-height-3">{fullname}</span>
                 </div>
-                
             </div>
             }
-            <p>daaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>
-            <Link to={"/test/4/Practice-Test/exam-simulation/start"}>Start</Link>
             </div>
         </UserLayout>
     )

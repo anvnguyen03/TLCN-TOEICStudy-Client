@@ -1,8 +1,8 @@
 import React, { Suspense, useEffect, useRef, useState } from "react"
 import { UserLayout } from "../../layouts/user layouts/Userlayout.tsx"
-import { DisplayTestItemDTO, ETestItemType, ETestMode, OrderNumber, SubmitAnswer, SubmitFullTestRequest, UserAnswer, UserAnswerSheet } from "../../types/type.ts"
+import { DisplayTestItemDTO, ETestItemType, ETestMode, OrderNumber, SubmitAnswer, SubmitFullTestRequest, TestInfoDTO, UserAnswer, UserAnswerSheet } from "../../types/type.ts"
 import { useTestItem } from "../../hooks/testHooks.tsx"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { ProgressSpinner } from "primereact/progressspinner"
 import { Toolbar } from "primereact/toolbar"
@@ -23,11 +23,12 @@ const FullTestSimulation: React.FC = () => {
 
     const toast = useRef<Toast>(null)
     const navigate = useNavigate()
+    const location = useLocation()
     const countdownRef = useRef<{ getTimeLeft: () => number; stopTimer: () => void } | null>(null)
-    const audioSrc = "/Practice_Set_TOEIC_Test 1.mp3"
-
+    const testInfo: TestInfoDTO = location.state?.testInfo
+    const audioSrc = testInfo.listeningAudio
     const [loading, setLoading] = useState<boolean>(false)
-    const duration = 120 // minute
+    const duration = testInfo.duration // minute
     const { id } = useParams<{ id: string }>()  // tham số kiểu string theo mặc định
     const testId = Number(id)   // ép kiểu về number
     const displayTestItems: DisplayTestItemDTO[] = useTestItem(testId)
