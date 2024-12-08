@@ -121,7 +121,7 @@ export const AdminLayout = ({ children, tabName }: { children: ReactNode, tabNam
         >
             <div className="layout-topbar">
                 <div className="layout-topbar-start">
-                    <a href="/admin/dashboard"><img src={logo} alt="bastion-300" /></a>
+                    <Link to={'/home'}><img src={logo} alt="bastion-300" /></Link>
                 </div>
                 <div className="layout-topbar-end">
                     <div className="layout-topbar-actions-end">

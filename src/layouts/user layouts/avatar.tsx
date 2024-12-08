@@ -28,7 +28,7 @@ const AvatarHeader: React.FC = () => {
                 {
                     label: 'Test history',
                     icon: 'pi pi-history',
-                    url: '/testhistory'
+                    url: '/test-history'
                 },
                 {
                     label: 'Log out',

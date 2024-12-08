@@ -142,6 +142,19 @@ export type TestCategoryDTO = {
     id: number
     name: string
 }
+
+export type UserDTO = {
+    id: number
+    fullname: string
+    email: string
+    role: string
+    activated: boolean
+}
+
+export type ResultHistoryByTest = {
+    testTitle: string
+    userResults: UserResultDTO[]
+}
 // -------------------- Do-Test item type --------------------
 
 export type UserAnswerSheet = Map<OrderNumber, UserAnswer>

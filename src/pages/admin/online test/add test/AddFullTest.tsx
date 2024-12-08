@@ -4,7 +4,7 @@ import { MenuItem } from "primereact/menuitem"
 import { Link, useNavigate } from "react-router-dom"
 import { FileUpload, FileUploadFile, FileUploadRemoveEvent, FileUploadSelectEvent } from "primereact/fileupload"
 import { Fieldset } from "primereact/fieldset"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Button } from "primereact/button"
 import { Divider } from "primereact/divider"
 import LoadingOverlay from "../../../../components/LoadingOverlay"
@@ -20,6 +20,7 @@ const AddFullTest = () => {
     const [excel, setExcel] = useState<FileUploadFile[]>([])
     const [images, setImages] = useState<FileUploadFile[]>([])
     const [audios, setAudios] = useState<FileUploadFile[]>([])
+    const [submitable, setSubmitable] = useState<boolean>(false)
 
     const navigate = useNavigate()
     const toast = useRef<Toast>(null)
@@ -115,6 +116,7 @@ const AddFullTest = () => {
 
         try {
             const response = await ManageTestService.callUploadFullTest(formData)
+            clearResources()
             toast.current?.show({
                 severity: "success",
                 summary: "Upload success",
@@ -125,7 +127,7 @@ const AddFullTest = () => {
                         <div className="flex align-items-center gap-2">
                             <span className="font-bold text-900">{props.message.summary}</span>
                         </div>
-                        <div className="font-medium text-lg my-3 text-900">{props.message.detail}</div>
+                        <div className="font-medium text-lg my-3 text-900">New Test ID: {props.message.detail}</div>
                         <Button className="p-button-sm flex" label="View" severity="success" onClick={() => navigate(`admin/test/${response.data}}`)}></Button>
                     </div>
                 )
@@ -137,6 +139,20 @@ const AddFullTest = () => {
             setLoading(false)
         }
     }
+
+    const clearResources = () => {
+        setExcel([])
+        setImages([])
+        setAudios([])
+    }
+
+    useEffect(() => {
+        if (excel.length > 0 && images.length > 0 && audios.length > 0) {
+            setSubmitable(true)
+        } else {
+            setSubmitable(false)
+        }
+    }, [audios, excel, images])
 
     return (
         <AdminLayout tabName="Test">
@@ -162,7 +178,7 @@ const AddFullTest = () => {
                     <FileUpload ref={imageUploadRef} name="images[]" url={'/api/upload'}
                         multiple accept="image/*" maxFileSize={10000000}
                         emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>}
-                        cancelOptions={{ style: { display: 'none' } }}
+
                         uploadOptions={{ style: { display: 'none' } }}
                         onSelect={onImagesSelect}
                         onRemove={onImageRemove}
@@ -183,7 +199,7 @@ const AddFullTest = () => {
                 <br />
                 <Divider />
                 <div className="flex justify-content-center">
-                    <Button label="Submit" raised severity="help" onClick={confirmPopup} />
+                    <Button label="Submit" raised severity="help" onClick={confirmPopup} disabled={!submitable}/>
                 </div>
             </div>
         </AdminLayout>

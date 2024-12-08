@@ -23,6 +23,7 @@ import AdminCategory from './pages/admin/online test/AdminCategory'
 import AdminAccount from './pages/admin/user/AdminAccount'
 import AdminTestResult from './pages/admin/user/AdminTestResult'
 import AddFullTest from './pages/admin/online test/add test/AddFullTest'
+import TestHistory from './pages/profile/TestHistory'
 
 function App() {
 
@@ -55,6 +56,7 @@ function App() {
 
         {/* Protected Routes for Users */}
         {/* <Route element={<ProtectedRoute allowedRoles={['ADMIN', 'USER']} />}> */}
+        <Route path="/test-history" element={<TestHistory />} />
         <Route path="/test/:id/:title/simulation/start" element={<FullTestSimulation />} />
         <Route path="/test/:id/:title/practice/start" element={<FullTestPractice />} />
         <Route path="/test/:testIdParam/results/:resultIdParam" element={<TestResult />} />
