@@ -31,9 +31,9 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     // Menu Items
     const MenuItems = () => (
         <ul className="list-none p-0 m-0 flex lg:align-items-center select-none flex-column lg:flex-row z-5">
-            <MenuItem icon="fa-solid fa-house" label="Trang chủ" url="/home" />
-            <MenuItem icon="fa-solid fa-graduation-cap" label="Đề thi online" url="/tests" />
-            <MenuItem icon="fa-solid fa-book" label="Khóa học" url="/courses" />
+            <MenuItem icon="fa-solid fa-house" label="Homepage" url="/home" />
+            <MenuItem icon="fa-solid fa-graduation-cap" label="Online Tests" url="/tests" />
+            <MenuItem icon="fa-solid fa-book" label="Courses" url="/courses" />
         </ul>
     )
 
@@ -57,7 +57,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     const UserAvatar = () => (
         <div className="flex align-items-center gap-2">
             {
-                isAuthenticated ? <AvatarHeader /> : <Button label='Đăng nhập' rounded severity="secondary" onClick={() => hanldeLoginClick()} />
+                isAuthenticated ? <AvatarHeader /> : <Button label='Đăng nhập' rounded severity="info" onClick={() => hanldeLoginClick()} />
             }
         </div>
     )

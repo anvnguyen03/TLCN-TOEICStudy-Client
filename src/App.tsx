@@ -35,6 +35,7 @@ import CourseLearnWrapper from './components/course/CourseLearnWrapper'
 import CourseTrialWrapper from './components/course/course trial/CourseTrialWrapper'
 import LoadingOverlay from './components/LoadingOverlay'
 import MyLearning from './pages/profile/MyLearning'
+import TestAnalytics from './pages/profile/TestAnalytics'
 
 function App() {
 
@@ -76,6 +77,7 @@ function App() {
         {/* Protected Routes for User */}
         <Route path="/profile" element={<ProtectedUserRoute><Profile /></ProtectedUserRoute>} />
         <Route path="/test-history" element={<ProtectedUserRoute><TestHistory /></ProtectedUserRoute>} />
+        <Route path="/test-analytics" element={<ProtectedUserRoute><TestAnalytics /></ProtectedUserRoute>} />
         <Route path="/my-learning" element={<ProtectedUserRoute><MyLearning /></ProtectedUserRoute>} />
         <Route path="/test/:id/:title/simulation/start" element={<ProtectedUserRoute><FullTestSimulation /></ProtectedUserRoute>} />
         <Route path="/test/:id/:title/practice/start" element={<ProtectedUserRoute><FullTestPractice /></ProtectedUserRoute>} />

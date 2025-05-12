@@ -27,9 +27,9 @@ const AvatarHeader: React.FC = () => {
                     url: '/profile'
                 },
                 {
-                    label: 'Test history',
-                    icon: 'pi pi-history',
-                    url: '/test-history'
+                    label: 'Test Analytics',
+                    icon: 'pi pi-chart-line',
+                    url: '/test-analytics'
                 },
                 {
                     label: 'My learning',

@@ -206,26 +206,7 @@ const TestDetailsPage: React.FC = () => {
                                 <span className="pi pi-comments mr-2 font-bold"></span>
                                 {test?.totalComments} bình luận
                             </div>
-                            <div className="mb-4">
-                                <i className="text-red-500">Chú ý: để xem toàn bộ đáp án và transcript của đề thi,
-                                    bạn phải hoàn thành ít nhất 1 lần luyện tập đề thi này
-                                </i>
-                            </div>
                             <br />
-                            {test?.isUserAttemped && (
-                                <div className="results-table mb-5">
-                                    <b>Kết quả làm bài của bạn:</b>
-                                    <div className="mt-3 max-w-full">
-                                        <DataTable value={results} showGridlines stripedRows tableStyle={{ minWidth: '50rem' }}>
-                                            <Column field="testMode" header="Mode" body={testModeBodyTemplate}></Column>
-                                            <Column field="completedAt" header="Ngày làm"></Column>
-                                            <Column header="Kết quả" body={scoreBodyTemplate}></Column>
-                                            <Column field="completionTime" header="Thời gian làm bài" body={completionTimeBodyTemplate}></Column>
-                                            <Column body={actionBodyTemplate}></Column>
-                                        </DataTable>
-                                    </div>
-                                </div>
-                            )}
                             <TabView>
                                 <TabPanel header='Simulation'>
                                     <Message severity="warn" text="Mô phỏng quy trình thi thật trên máy, bạn không thể tua audio Listening cũng như các câu hỏi một cách tự do. 
@@ -250,7 +231,27 @@ const TestDetailsPage: React.FC = () => {
                         </>
                     )}
                     {activeTab === 'answer' && (
-                        <div className="">Đáp án/Transcript</div>
+                        <>
+                            <div className="mb-4">
+                                <i className="text-red-500">Chú ý: để xem toàn bộ đáp án và transcript của đề thi,
+                                    bạn phải hoàn thành ít nhất 1 lần luyện tập đề thi này
+                                </i>
+                            </div>
+                            {test?.isUserAttemped && (
+                                <div className="results-table mb-5">
+                                    <b>Kết quả làm bài của bạn:</b>
+                                    <div className="mt-3 max-w-full">
+                                        <DataTable value={results} showGridlines stripedRows tableStyle={{ minWidth: '50rem' }}>
+                                            <Column field="testMode" header="Mode" body={testModeBodyTemplate}></Column>
+                                            <Column field="completedAt" header="Ngày làm"></Column>
+                                            <Column header="Kết quả" body={scoreBodyTemplate}></Column>
+                                            <Column field="completionTime" header="Thời gian làm bài" body={completionTimeBodyTemplate}></Column>
+                                            <Column body={actionBodyTemplate}></Column>
+                                        </DataTable>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
