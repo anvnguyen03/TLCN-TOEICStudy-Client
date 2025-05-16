@@ -318,7 +318,6 @@ const TestHistory: React.FC = () => {
                                 <DataTable 
                                     value={test.userResults} 
                                     stripedRows 
-                                    responsiveLayout="scroll"
                                     emptyMessage="No test attempts found"
                                     className="p-datatable-sm"
                                 >

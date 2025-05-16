@@ -14,6 +14,50 @@ export interface IFetchAccount {
 
 // ------------------ type for DTO got from API response ------------------
 
+export interface TestAnalyticsDTO {
+    currentScore: number
+    previousScore: number
+    maxPossibleScore: number
+    testsTaken: number
+    strongestPart: string
+    weakestPart: string
+    improvementStats: {
+        totalImprovement: number
+        improvementTrend: string
+    }
+    overallStats: {
+        totalTestsCompleted: number
+        totalQuestionsAnswered: number
+        averageAccuracy: number
+        totalStudyTime: number
+        listeningAccuracy: number
+        readingAccuracy: number
+        bestScore: number
+        averageScore: number
+    }
+    scoreHistory: {
+        date: string
+        listening: number
+        reading: number
+        total: number
+    }[]
+    partPerformance: {
+        part: number
+        name: string
+        userAccuracy: number
+        avgAccuracy: number
+    }[]
+    recentTests: {
+        id: number
+        title: string
+        date: string
+        listening: number
+        reading: number
+        total: number
+        timeToComplete: number // in seconds
+    }[]
+}
+
 export interface ReviewStatistics {
     averageRating: number
     oneStarRating: number

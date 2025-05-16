@@ -61,7 +61,7 @@ export const AdminLayout = ({ children, tabName }: { children: ReactNode, tabNam
             items: [
                 {
                     label: 'Category',
-                    icon: 'pi pi-book',
+                    icon: 'pi pi-list',
                     data: '/admin/test-category',
                     template: itemRenderer
                 },
@@ -87,6 +87,17 @@ export const AdminLayout = ({ children, tabName }: { children: ReactNode, tabNam
                     label: 'Test Result',
                     icon: 'pi pi-check',
                     data: '/admin/user-result',
+                    template: itemRenderer
+                }
+            ]
+        },
+        {
+            label: 'Course',
+            items: [
+                {
+                    label: 'Course',
+                    icon: 'pi pi-book',
+                    data: '/admin/course',
                     template: itemRenderer
                 }
             ]

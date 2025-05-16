@@ -9,110 +9,20 @@ import { Column } from "primereact/column"
 import { Button } from "primereact/button"
 import { Dropdown } from "primereact/dropdown"
 import { Divider } from "primereact/divider"
+import { callGetTestAnalytics } from "../../services/TestAnalyticsService"
+import { TestAnalyticsDTO } from "../../types/type"
+import { Toast } from "primereact/toast"
 
-// Mock data for TOEIC analytics
-const mockAnalyticsData = {
-    currentScore: 785,
-    previousScore: 720,
-    listeningScore: 395,
-    readingScore: 390,
-    maxPossibleScore: 990,
-    testsTaken: 12,
-    averageImprovement: 15,
-    strongestPart: "Part 1 - Photographs",
-    weakestPart: "Part 7 - Reading Comprehension",
-    
-    // Enhanced improvement metrics
-    improvementStats: {
-        totalImprovement: 155, // from first test to current
-        monthlyImprovement: 12.5,
-        consistentImprovement: true,
-        improvementTrend: "upward", // upward, stable, declining
-        bestMonth: "April 2024",
-        biggestJump: 45,
-        currentStreak: 4, // consecutive tests with improvement
-        averageTestsPerMonth: 2.4
-    },
-    
-    // Overall performance metrics
-    overallStats: {
-        totalTestsCompleted: 24,
-        totalQuestionsAnswered: 4800,
-        averageAccuracy: 78.5,
-        totalStudyTime: "156 hours",
-        listeningAccuracy: 82.3,
-        readingAccuracy: 74.7,
-        bestScore: 785,
-        averageScore: 695,
-        improvementRate: 12.5
-    },
-    
-    // Score history
-    scoreHistory: [
-        { date: "2024-01", listening: 320, reading: 310, total: 630 },
-        { date: "2024-02", listening: 340, reading: 330, total: 670 },
-        { date: "2024-03", listening: 365, reading: 355, total: 720 },
-        { date: "2024-04", listening: 380, reading: 370, total: 750 },
-        { date: "2024-05", listening: 395, reading: 390, total: 785 },
-    ],
-    
-    // Part-wise performance
-    partPerformance: [
-        { part: "Part 1", name: "Photographs", score: 85, maxScore: 100, accuracy: 85 },
-        { part: "Part 2", name: "Question-Response", score: 78, maxScore: 100, accuracy: 78 },
-        { part: "Part 3", name: "Conversations", score: 72, maxScore: 100, accuracy: 72 },
-        { part: "Part 4", name: "Talks", score: 75, maxScore: 100, accuracy: 75 },
-        { part: "Part 5", name: "Incomplete Sentences", score: 80, maxScore: 100, accuracy: 80 },
-        { part: "Part 6", name: "Text Completion", score: 70, maxScore: 100, accuracy: 70 },
-        { part: "Part 7", name: "Reading Comprehension", score: 68, maxScore: 100, accuracy: 68 },
-    ],
-    
-    // Recent test results with titles
-    recentTests: [
-        { 
-            id: 1, 
-            title: "TOEIC Practice Test #15",
-            date: "2024-05-15", 
-            listening: 395, 
-            reading: 390, 
-            total: 785, 
-            timeToComplete: "118 min" 
-        },
-        { 
-            id: 2, 
-            title: "Advanced Reading Comprehension Test",
-            date: "2024-04-20", 
-            listening: 380, 
-            reading: 370, 
-            total: 750, 
-            timeToComplete: "125 min" 
-        },
-        { 
-            id: 3, 
-            title: "TOEIC Listening Focus Test",
-            date: "2024-03-25", 
-            listening: 365, 
-            reading: 355, 
-            total: 720, 
-            timeToComplete: "115 min" 
-        },
-        { 
-            id: 4, 
-            title: "Complete TOEIC Simulation",
-            date: "2024-02-28", 
-            listening: 340, 
-            reading: 330, 
-            total: 670, 
-            timeToComplete: "130 min" 
-        },
-    ]
-}
+type BadgeSeverity = "success" | "info" | "warning" | "danger" | "secondary" | "contrast"
 
 const TestAnalytics: React.FC = () => {
     const [chartData, setChartData] = useState({})
     const [chartOptions, setChartOptions] = useState({})
     const [partChartData, setPartChartData] = useState({})
     const [selectedPeriod, setSelectedPeriod] = useState({ label: "Last 6 Months", value: "6m" })
+    const [analyticsData, setAnalyticsData] = useState<TestAnalyticsDTO | null>(null)
+    const [loading, setLoading] = useState(true)
+    const toast = React.useRef<Toast>(null)
     
     const periodOptions = [
         { label: "Last 3 Months", value: "3m" },
@@ -122,24 +32,56 @@ const TestAnalytics: React.FC = () => {
     ]
 
     useEffect(() => {
+        const fetchAnalyticsData = async () => {
+            try {
+                setLoading(true)
+                const response = await callGetTestAnalytics()
+                if (response.data) {
+                    setAnalyticsData(response.data)
+                } else {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to fetch analytics data',
+                        life: 3000
+                    })
+                }
+            } catch (err) {
+                console.error('Error fetching analytics data:', err)
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'An error occurred while fetching analytics data',
+                    life: 3000
+                })
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchAnalyticsData()
+    }, [])
+
+    useEffect(() => {
+        if (!analyticsData) return
+
         // Score progress chart
-        const documentStyle = getComputedStyle(document.documentElement)
         const data = {
-            labels: mockAnalyticsData.scoreHistory.map(item => item.date),
+            labels: analyticsData.scoreHistory.map(item => item.date),
             datasets: [
                 {
                     label: 'Total Score',
-                    data: mockAnalyticsData.scoreHistory.map(item => item.total),
+                    data: analyticsData.scoreHistory.map(item => item.total),
                     fill: false,
                     borderColor: '#2196F3',
                     backgroundColor: '#2196F3',
                     tension: 0.4,
-                    pointRadius: 6,
-                    pointHoverRadius: 8
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 },
                 {
                     label: 'Listening',
-                    data: mockAnalyticsData.scoreHistory.map(item => item.listening),
+                    data: analyticsData.scoreHistory.map(item => item.listening),
                     fill: false,
                     borderColor: '#4CAF50',
                     backgroundColor: '#4CAF50',
@@ -149,7 +91,7 @@ const TestAnalytics: React.FC = () => {
                 },
                 {
                     label: 'Reading',
-                    data: mockAnalyticsData.scoreHistory.map(item => item.reading),
+                    data: analyticsData.scoreHistory.map(item => item.reading),
                     fill: false,
                     borderColor: '#FF9800',
                     backgroundColor: '#FF9800',
@@ -194,11 +136,11 @@ const TestAnalytics: React.FC = () => {
 
         // Part performance radar chart
         const partData = {
-            labels: mockAnalyticsData.partPerformance.map(item => item.part),
+            labels: analyticsData.partPerformance.map(item => item.part),
             datasets: [
                 {
                     label: 'Your Performance',
-                    data: mockAnalyticsData.partPerformance.map(item => item.accuracy),
+                    data: analyticsData.partPerformance.map(item => item.userAccuracy),
                     fill: true,
                     backgroundColor: 'rgba(33, 150, 243, 0.2)',
                     borderColor: '#2196F3',
@@ -209,7 +151,7 @@ const TestAnalytics: React.FC = () => {
                 },
                 {
                     label: 'Average Performance',
-                    data: [75, 70, 65, 68, 72, 65, 60], // Mock average data
+                    data: analyticsData.partPerformance.map(item => item.avgAccuracy),
                     fill: true,
                     backgroundColor: 'rgba(255, 152, 0, 0.2)',
                     borderColor: '#FF9800',
@@ -224,29 +166,53 @@ const TestAnalytics: React.FC = () => {
         setChartData(data)
         setChartOptions(options)
         setPartChartData(partData)
-    }, [])
+    }, [analyticsData])
 
     const getScoreLevel = (score: number) => {
-        if (score >= 860) return { level: "Advanced", color: "success", description: "Excellent proficiency" }
-        if (score >= 730) return { level: "Upper-Intermediate", color: "info", description: "Good proficiency" }
-        if (score >= 470) return { level: "Intermediate", color: "warning", description: "Fair proficiency" }
-        return { level: "Beginner", color: "danger", description: "Basic proficiency" }
+        if (score >= 860) return { level: "Advanced", color: "success" as BadgeSeverity, description: "Excellent proficiency" }
+        if (score >= 730) return { level: "Upper-Intermediate", color: "info" as BadgeSeverity, description: "Good proficiency" }
+        if (score >= 470) return { level: "Intermediate", color: "warning" as BadgeSeverity, description: "Fair proficiency" }
+        return { level: "Beginner", color: "danger" as BadgeSeverity, description: "Basic proficiency" }
     }
 
-    const currentLevel = getScoreLevel(mockAnalyticsData.currentScore)
+    if (loading) {
+        return (
+            <UserLayout>
+                <div className="flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+                    <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+                </div>
+            </UserLayout>
+        )
+    }
 
-    const scoreTemplate = (rowData: any) => {
+    if (!analyticsData) {
+        return (
+            <UserLayout>
+                <div className="flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+                    <div className="text-center">
+                        <i className="pi pi-exclamation-triangle text-4xl mb-3" style={{ color: '#FF9800' }}></i>
+                        <h2>No Data Available</h2>
+                        <p>There is no analytics data available at the moment.</p>
+                    </div>
+                </div>
+            </UserLayout>
+        )
+    }
+
+    const currentLevel = getScoreLevel(analyticsData.currentScore)
+
+    const scoreTemplate = (rowData: { total: number }) => {
         const total = rowData.total
         const level = getScoreLevel(total)
         return (
             <div className="flex align-items-center gap-2">
                 <span className="font-bold">{total}</span>
-                <Badge value={level.level} severity={level.color as any} />
+                <Badge value={level.level} severity={level.color} />
             </div>
         )
     }
 
-    const dateTemplate = (rowData: any) => {
+    const dateTemplate = (rowData: { date: string }) => {
         return new Date(rowData.date).toLocaleDateString()
     }
 
@@ -259,10 +225,11 @@ const TestAnalytics: React.FC = () => {
         }
     }
 
-    const trendIcon = getTrendIcon(mockAnalyticsData.improvementStats.improvementTrend)
+    const trendIcon = getTrendIcon(analyticsData.improvementStats.improvementTrend)
 
     return (
         <UserLayout>
+            <Toast ref={toast} />
             <div style={{ 
                 minHeight: '100vh',
                 background: 'linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #4facfe 100%)',
@@ -281,10 +248,10 @@ const TestAnalytics: React.FC = () => {
                             <Card className="text-center h-full">
                                 <div className="p-4">
                                     <div className="text-3xl font-bold text-blue-600 mb-2">
-                                        {mockAnalyticsData.currentScore}
+                                        {analyticsData.currentScore}
                                     </div>
                                     <div className="text-sm text-600 mb-2">Best Score</div>
-                                    <Badge value={currentLevel.level} severity={currentLevel.color as any} />
+                                    <Badge value={currentLevel.level} severity={currentLevel.color} />
                                     <div className="text-xs text-500 mt-1">{currentLevel.description}</div>
                                 </div>
                             </Card>
@@ -292,18 +259,19 @@ const TestAnalytics: React.FC = () => {
                         <div className="col-12 md:col-4">
                             <Card className="text-center h-full">
                                 <div className="p-4">
-                                    <div className="text-3xl font-bold text-green-600 mb-2">
-                                        +{mockAnalyticsData.improvementStats.totalImprovement}
+                                    <div className={`text-3xl font-bold ${trendIcon.color} mb-2`}>
+                                        {analyticsData.improvementStats.totalImprovement}
                                     </div>
                                     <div className="text-sm text-600 mb-2">Total Improvement from first test</div>
                                 </div>
+                                <Badge value={analyticsData.improvementStats.improvementTrend} severity={trendIcon.color as BadgeSeverity} />
                             </Card>
                         </div>
                         <div className="col-12 md:col-4">
                             <Card className="text-center h-full">
                                 <div className="p-4">
                                     <div className="text-3xl font-bold text-purple-600 mb-2">
-                                        {mockAnalyticsData.testsTaken}
+                                        {analyticsData.testsTaken}
                                     </div>
                                     <div className="text-sm text-600 mb-2">Tests Completed</div>
                                 </div>
@@ -322,22 +290,22 @@ const TestAnalytics: React.FC = () => {
                                 <div className="col-12 md:col-6 lg:col-3">
                                     <div className="text-center p-3 border-round bg-blue-50">
                                         <div className="text-2xl font-bold text-blue-600 mb-1">
-                                            {mockAnalyticsData.overallStats.totalTestsCompleted}
+                                            {analyticsData.overallStats.totalTestsCompleted}
                                         </div>
                                         <div className="text-sm text-600">Tests Completed</div>
                                         <div className="text-xs text-500 mt-1">
-                                            {mockAnalyticsData.overallStats.totalQuestionsAnswered.toLocaleString()} questions answered
+                                            {analyticsData.overallStats.totalQuestionsAnswered.toLocaleString()} questions answered
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-12 md:col-6 lg:col-3">
                                     <div className="text-center p-3 border-round bg-green-50">
                                         <div className="text-2xl font-bold text-green-600 mb-1">
-                                            {mockAnalyticsData.overallStats.averageAccuracy}%
+                                            {analyticsData.overallStats.averageAccuracy}%
                                         </div>
                                         <div className="text-sm text-600">Overall Accuracy</div>
                                         <ProgressBar 
-                                            value={mockAnalyticsData.overallStats.averageAccuracy} 
+                                            value={analyticsData.overallStats.averageAccuracy} 
                                             style={{ height: '4px' }}
                                             className="mt-2"
                                         />
@@ -346,23 +314,20 @@ const TestAnalytics: React.FC = () => {
                                 <div className="col-12 md:col-6 lg:col-3">
                                     <div className="text-center p-3 border-round bg-orange-50">
                                         <div className="text-2xl font-bold text-orange-600 mb-1">
-                                            {mockAnalyticsData.overallStats.averageScore}
+                                            {analyticsData.overallStats.averageScore}
                                         </div>
                                         <div className="text-sm text-600">Average Score</div>
                                         <div className="text-xs text-500 mt-1">
-                                            Best: {mockAnalyticsData.overallStats.bestScore}
+                                            Best: {analyticsData.overallStats.bestScore}
                                         </div>
                                     </div>
                                 </div>
                                 <div className="col-12 md:col-6 lg:col-3">
                                     <div className="text-center p-3 border-round bg-purple-50">
                                         <div className="text-2xl font-bold text-purple-600 mb-1">
-                                            {mockAnalyticsData.overallStats.totalStudyTime}
+                                            {analyticsData.overallStats.totalStudyTime} Minutes
                                         </div>
                                         <div className="text-sm text-600">Study Time</div>
-                                        <div className="text-xs text-500 mt-1">
-                                            +{mockAnalyticsData.overallStats.improvementRate}% improvement rate
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -379,17 +344,17 @@ const TestAnalytics: React.FC = () => {
                                                 Listening Performance
                                             </h4>
                                             <Badge 
-                                                value={mockAnalyticsData.overallStats.listeningAccuracy >= 80 ? 'Strong' : 'Good'} 
-                                                severity={mockAnalyticsData.overallStats.listeningAccuracy >= 80 ? 'success' : 'info'}
+                                                value={analyticsData.overallStats.listeningAccuracy >= 80 ? 'Strong' : 'Good'} 
+                                                severity={analyticsData.overallStats.listeningAccuracy >= 80 ? 'success' : 'info'}
                                             />
                                         </div>
                                         <div className="flex align-items-center gap-3 mb-2">
                                             <span className="text-2xl font-bold text-blue-700">
-                                                {mockAnalyticsData.overallStats.listeningAccuracy}%
+                                                {analyticsData.overallStats.listeningAccuracy}%
                                             </span>
                                             <div className="flex-1">
                                                 <ProgressBar 
-                                                    value={mockAnalyticsData.overallStats.listeningAccuracy} 
+                                                    value={analyticsData.overallStats.listeningAccuracy} 
                                                     style={{ height: '8px' }}
                                                     color="#2196F3"
                                                 />
@@ -408,17 +373,17 @@ const TestAnalytics: React.FC = () => {
                                                 Reading Performance
                                             </h4>
                                             <Badge 
-                                                value={mockAnalyticsData.overallStats.readingAccuracy >= 80 ? 'Strong' : 'Needs Focus'} 
-                                                severity={mockAnalyticsData.overallStats.readingAccuracy >= 80 ? 'success' : 'warning'}
+                                                value={analyticsData.overallStats.readingAccuracy >= 80 ? 'Strong' : 'Needs Focus'} 
+                                                severity={analyticsData.overallStats.readingAccuracy >= 80 ? 'success' : 'warning'}
                                             />
                                         </div>
                                         <div className="flex align-items-center gap-3 mb-2">
                                             <span className="text-2xl font-bold text-orange-700">
-                                                {mockAnalyticsData.overallStats.readingAccuracy}%
+                                                {analyticsData.overallStats.readingAccuracy}%
                                             </span>
                                             <div className="flex-1">
                                                 <ProgressBar 
-                                                    value={mockAnalyticsData.overallStats.readingAccuracy} 
+                                                    value={analyticsData.overallStats.readingAccuracy} 
                                                     style={{ height: '8px' }}
                                                     color="#FF9800"
                                                 />
@@ -472,7 +437,7 @@ const TestAnalytics: React.FC = () => {
                                     </h3>
                                     <div className="bg-green-50 p-4 border-round border-left-4 border-green-500">
                                         <div className="font-bold text-green-800 mb-2">
-                                            {mockAnalyticsData.strongestPart}
+                                            {analyticsData.strongestPart}
                                         </div>
                                         <div className="text-green-700 text-sm mb-3">
                                             You excel in identifying details in photographs and understanding basic vocabulary.
@@ -491,7 +456,7 @@ const TestAnalytics: React.FC = () => {
                                     </h3>
                                     <div className="bg-orange-50 p-4 border-round border-left-4 border-orange-500">
                                         <div className="font-bold text-orange-800 mb-2">
-                                            {mockAnalyticsData.weakestPart}
+                                            {analyticsData.weakestPart}
                                         </div>
                                         <div className="text-orange-700 text-sm mb-3">
                                             Practice reading longer passages and improve time management for complex texts.
@@ -507,7 +472,7 @@ const TestAnalytics: React.FC = () => {
                     <Card className="mb-6">
                         <div className="p-4">
                             <h3 className="text-xl font-bold mb-4">Detailed Part Analysis</h3>
-                            <DataTable value={mockAnalyticsData.partPerformance} responsiveLayout="scroll">
+                            <DataTable value={analyticsData.partPerformance} responsiveLayout="scroll">
                                 <Column field="part" header="Part" />
                                 <Column field="name" header="Section Name" />
                                 <Column 
@@ -516,11 +481,11 @@ const TestAnalytics: React.FC = () => {
                                     body={(rowData) => (
                                         <div className="flex align-items-center gap-2">
                                             <ProgressBar 
-                                                value={rowData.accuracy} 
+                                                value={rowData.userAccuracy} 
                                                 style={{ width: '100px', height: '6px' }}
-                                                color={rowData.accuracy >= 80 ? '#4CAF50' : rowData.accuracy >= 70 ? '#FF9800' : '#F44336'}
+                                                color={rowData.userAccuracy >= 80 ? '#4CAF50' : rowData.userAccuracy >= 70 ? '#FF9800' : '#F44336'}
                                             />
-                                            <span className="font-semibold">{rowData.accuracy}%</span>
+                                            <span className="font-semibold">{rowData.userAccuracy}%</span>
                                         </div>
                                     )}
                                 />
@@ -529,8 +494,8 @@ const TestAnalytics: React.FC = () => {
                                     header="Status"
                                     body={(rowData) => (
                                         <Badge 
-                                            value={rowData.accuracy >= 80 ? 'Strong' : rowData.accuracy >= 70 ? 'Good' : 'Needs Work'}
-                                            severity={rowData.accuracy >= 80 ? 'success' : rowData.accuracy >= 70 ? 'info' : 'warning'}
+                                            value={rowData.userAccuracy >= 80 ? 'Strong' : rowData.userAccuracy >= 70 ? 'Good' : 'Needs Work'}
+                                            severity={rowData.userAccuracy >= 80 ? 'success' : rowData.userAccuracy >= 70 ? 'info' : 'warning'}
                                         />
                                     )}
                                 />
@@ -545,19 +510,17 @@ const TestAnalytics: React.FC = () => {
                                 <h3 className="text-xl font-bold">Recent Test Results</h3>
                                 <Button label="View All Results" icon="pi pi-external-link" outlined onClick={() => window.location.href = '/test-history'}/>
                             </div>
-                            <DataTable value={mockAnalyticsData.recentTests} responsiveLayout="scroll">
+                            <DataTable value={analyticsData.recentTests} responsiveLayout="scroll">
                                 <Column field="title" header="Test Title" style={{ minWidth: '200px' }} />
                                 <Column field="date" header="Date" body={dateTemplate} />
                                 <Column field="listening" header="Listening" />
                                 <Column field="reading" header="Reading" />
                                 <Column field="total" header="Total Score" body={scoreTemplate} />
-                                <Column field="timeToComplete" header="Completion Time" />
-                                <Column 
-                                    header="Actions"
-                                    body={() => (
-                                        <Button icon="pi pi-eye" size="small" outlined tooltip="View Details" />
-                                    )}
-                                />
+                                <Column field="timeToComplete" header="Completion Time" body={(rowData) => {
+                                    const minutes = Math.floor(rowData.timeToComplete / 60)
+                                    const seconds = rowData.timeToComplete % 60
+                                    return `${minutes}m ${seconds.toString().padStart(2, '0')}s`
+                                }} />
                             </DataTable>
                         </div>
                     </Card>

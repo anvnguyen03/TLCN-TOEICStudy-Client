@@ -36,6 +36,7 @@ import CourseTrialWrapper from './components/course/course trial/CourseTrialWrap
 import LoadingOverlay from './components/LoadingOverlay'
 import MyLearning from './pages/profile/MyLearning'
 import TestAnalytics from './pages/profile/TestAnalytics'
+import AdminCourse from './pages/admin/course/AdminCourse'
 
 function App() {
 
@@ -95,6 +96,7 @@ function App() {
           <Route path="test/add/full-test" element={<AddFullTest />} />
           <Route path="user" element={<AdminAccount />} />
           <Route path="user-result" element={<AdminTestResult />} />
+          <Route path="course" element={<AdminCourse />} />
         </Route>
       </Routes>
     </BrowserRouter>

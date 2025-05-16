@@ -1,0 +1,19 @@
+/* Custom styles for course management */
+.lesson-panel .p-panel-header {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+  }
+  
+  .lesson-panel .p-panel-content {
+    padding-top: 1.25rem;
+  }
+  
+  .lesson-panel:hover .p-panel-header {
+    background-color: #f0f2f5;
+  }
+  
+  .lesson-panel .p-panel-header:focus {
+    box-shadow: 0 0 0 0.2rem rgba(38, 143, 255, 0.25);
+    outline: 0 none;
+  }
+  

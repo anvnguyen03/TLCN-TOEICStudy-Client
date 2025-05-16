@@ -360,6 +360,7 @@ const CourseBody: React.FC = () => {
   const context = useContext(CourseTrialContext);
   const [quizKey, setQuizKey] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
+  const token = localStorage.getItem('token');
 
   // Reset quiz key when lesson changes
   React.useEffect(() => {
@@ -373,6 +374,11 @@ const CourseBody: React.FC = () => {
   const { currentLesson, setCurrentLesson, lessons, courseInfo, isLoading, error } = context;
   const { lessonIndex } = currentLesson;
   const lesson = lessons[lessonIndex];
+  
+  let videoUrl = '';
+  if (courseInfo) {
+    videoUrl = `http://localhost:8080/api/v1/video-serve/stream/${courseInfo.id}/${lesson.id}/${lesson.videoUrl}?token=${token}`;
+  }
 
   // Show loading state
   if (isLoading) {
@@ -453,7 +459,7 @@ const CourseBody: React.FC = () => {
         {lesson.type === 'VIDEO' && lesson.videoUrl && (
           <div className="p-mb-4">
             <ReactPlayer
-              url={lesson.videoUrl}
+              url={videoUrl}
               controls
               width="100%"
             />
