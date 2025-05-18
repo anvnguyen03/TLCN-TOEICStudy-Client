@@ -23,7 +23,8 @@ const AvatarHeader: React.FC = () => {
             items: [
                 {
                     label: 'Profile',
-                    icon: 'pi pi-user'
+                    icon: 'pi pi-user',
+                    url: '/profile'
                 },
                 {
                     label: 'Test history',

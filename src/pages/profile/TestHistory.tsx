@@ -91,14 +91,14 @@ const TestHistory: React.FC = () => {
                 </div>
 
                 <div className="md:mx-auto mb-3 text-center">
-                    <div className="profile-cover-avatar">
+                    {/* <div className="profile-cover-avatar">
 
                         <img className="avatar-img" src="/user_icon.webp" alt="an2572003" />
 
                         <a className="avatar-button text-dark">
                             <i className="avatar-icon pi pi-pencil"></i>
                         </a>
-                    </div>
+                    </div> */}
 
                     <h2 className="profile-header-title text-primary" id="an2572003-trang-công-khai">Kết quả luyện thi - {fullname}</h2>
 

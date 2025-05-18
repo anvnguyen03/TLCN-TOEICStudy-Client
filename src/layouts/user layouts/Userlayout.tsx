@@ -31,9 +31,9 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     // Menu Items
     const MenuItems = () => (
         <ul className="list-none p-0 m-0 flex lg:align-items-center select-none flex-column lg:flex-row z-5">
-            <MenuItem icon="pi pi-home" label="Home" url="/home" />
-            <MenuItem icon="pi pi-graduation-cap" label="Đề thi online" url="/tests" />
-            <MenuItem icon="pi pi-clipboard" label="Luyện tập" url="/practices" />
+            <MenuItem icon="fa-solid fa-house" label="Trang chủ" url="/home" />
+            <MenuItem icon="fa-solid fa-graduation-cap" label="Đề thi online" url="/tests" />
+            <MenuItem icon="fa-solid fa-book" label="Khóa học" url="/courses" />
         </ul>
     )
 
@@ -64,7 +64,8 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
 
     const TopBar = (): JSX.Element => (
         <div
-            className="fixed top-0 right-0 left-0 bg-gray-900 py-3 px-6 shadow-2 flex align-items-center justify-content-between border-bottom-1 border-gray-800 z-5"
+            id="topbar"
+            className="fixed top-0 right-0 left-0 bg-gray-900 py-3 px-6 shadow-2 flex align-items-center justify-content-between border-bottom-1 border-gray-800 z-5 opacity-90"
             style={{ minHeight: '60px' }}
         >
             <Logo />
@@ -81,7 +82,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     )
 
     const Footer = (): JSX.Element => (
-        <div className="surface-section px-4 py-6 md:px-6 lg:px-8 text-center">
+        <div id="footer" className="surface-section px-4 py-6 md:px-6 lg:px-8 text-center">
             <img src={logo} alt="Image" height="50" />
             <div className="font-medium text-900 mt-4 mb-3">© 2024 TOEIC Study, Inc</div>
             <p className="text-600 line-height-3 mt-0 mb-4">Cursus metus aliquam eleifend mi.

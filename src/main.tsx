@@ -6,7 +6,7 @@ import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primereact/resources/primereact.min.css';          
 import 'primeicons/primeicons.css';                       
 import 'primeflex/primeflex.css';                          
-
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 import { PrimeReactProvider } from 'primereact/api';
 import { Provider } from 'react-redux';

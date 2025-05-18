@@ -3,8 +3,8 @@ import { UserLayout } from "../../layouts/user layouts/Userlayout"
 import "./TestDetailsPage.css"
 import { Button } from "primereact/button"
 import React, { useEffect, useRef, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { ETestMode, TestInfoDTO, UserResultDTO } from "../../types/type"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { CommentDTO, CommentRequest, ETestMode, TestInfoDTO, UserResultDTO } from "../../types/type"
 import { DataTable } from "primereact/datatable"
 import { Column } from "primereact/column"
 import { Tag } from "primereact/tag"
@@ -14,9 +14,13 @@ import { TabPanel, TabView } from "primereact/tabview"
 import { Message } from "primereact/message"
 import { formatForUrl } from "../../utils/FormatForUrl"
 import { useAppSelector } from "../../hooks/reduxHooks"
-import { InputText } from "primereact/inputtext"
+import CommentInput from "../../components/comment/CommentInput"
+import CommentsItem from "../../components/comment/CommentItem"
+import { callAddComment, callDeleteComment, callGetCommentByTest } from "../../services/CommentService"
 
 const TestDetailsPage: React.FC = () => {
+    const [comments, setComments] = useState<CommentDTO[]>([])
+    const [loading, setLoading] = useState<boolean>(false)
 
     const navigate = useNavigate()
     const toast = useRef<Toast>(null)
@@ -25,6 +29,7 @@ const TestDetailsPage: React.FC = () => {
     const [test, setTest] = useState<TestInfoDTO>()
     const [results, setResults] = useState<UserResultDTO[]>()
     const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
+    const userId = useAppSelector(state => state.auth.userId)
 
     const getSeverity = (status: string) => {
         switch (status) {
@@ -109,6 +114,63 @@ const TestDetailsPage: React.FC = () => {
         }
         fetchTestInfo()
     }, [])
+
+    const fetchComments = async () => {
+        setLoading(true)
+        try {
+            const testId = Number(testIdParam)
+            const response = await callGetCommentByTest(testId)
+            if (response.data) {
+                setComments(response.data)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Error while fetching comments', life: 2000 })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (isAuthenticated)
+            fetchComments()
+    }, [isAuthenticated])
+
+    const handleAddComment = async (content: string, parentId?: number) => {
+        setLoading(true)
+        try {
+            const request: CommentRequest = {
+                content: content,
+                testId: Number(testIdParam),
+                userId: userId!,
+                parentId: parentId
+            }
+            const response = await callAddComment(request)
+            if (response.data) {
+                fetchComments()
+                toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Comment posted', life: 2000 })
+            }
+        } catch (error) {
+            console.log(error)
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Can not post comment', life: 2000 })
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleDeleteComment = async (commentId: number) => {
+        setLoading(true)
+        try {
+            await callDeleteComment(commentId)
+            fetchComments()
+            toast.current?.show({ severity: 'info', summary: 'Success', detail: 'Comment Deleted', life: 2000 })
+        } catch (error) {
+            console.log(error)
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Can not delete comment', life: 2000 })
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <UserLayout>
@@ -195,9 +257,31 @@ const TestDetailsPage: React.FC = () => {
 
             <div className="contentblock">
                 <h2 className="">Bình luận</h2>
-                <div className="p-inputgroup flex-1 ">
-                    <InputText placeholder="Keyword" />
-                    <Button label="Gửi" />
+                <div className="flex flex-column gap-2 w-11">
+                    {isAuthenticated ? <CommentInput loadingState={loading} handleAddComment={handleAddComment} />
+                        : <p>Vui lòng
+                            <Link to={'/login'}
+                                state={{ from: window.location.pathname }}
+                                className="text-primary font-semibold mx-1" style={{ textDecoration: 'none' }}
+                            > Đăng nhập
+                            </Link>
+                            để xem bình luận</p>
+                    }
+
+                    {isAuthenticated && <div>
+                        {comments.map((comment, index) => (
+                            <CommentsItem
+                                key={index}
+                                loadingState={loading}
+                                userId={userId}
+                                comment={comment}
+                                parent={null}
+                                handleAddComment={handleAddComment}
+                                handleDeleteComment={handleDeleteComment}
+                            />
+                        ))}
+                    </div>}
+
                 </div>
             </div>
         </UserLayout>

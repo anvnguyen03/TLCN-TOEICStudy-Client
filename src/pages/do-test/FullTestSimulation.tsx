@@ -297,7 +297,7 @@ const FullTestSimulation: React.FC = () => {
                 <div className="flex flex-column align-items-center w-full gap-3 border-bottom-1 surface-border">
                     <i className="pi pi-exclamation-circle text-6xl text-primary-500"></i>
                     <span>Are you sure you want to submit?</span>
-                    <span>Check your <a onClick={() => setAnsSheetVisible(true)} href="#">answer sheet</a> carefully before proceed</span>
+                    <span>Check your <a onClick={() => setAnsSheetVisible(true)} className="text-primary cursor-pointer">answer sheet</a> carefully before proceed</span>
                 </div>
             ),
             header: 'Confirmination',

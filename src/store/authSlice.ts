@@ -15,7 +15,7 @@ interface DecodedToken {
     role: string;
     fullname: string;
     userId: string;
-  }
+}
 
 interface AuthState {
     loading: boolean
@@ -25,16 +25,18 @@ interface AuthState {
     role: string | null
     fullname: string | null
     email: string | null
+    userId: number | null
 }
 
 const initialState: AuthState = {
-    loading: false,
+    loading: !!localStorage.getItem('token'),
     isAuthenticated: false,
-    token: null,
+    token: localStorage.getItem('token') || null,
     refreshToken: null,
     role: null,
     fullname: null,
-    email: null
+    email: null,
+    userId: null
 }
 
 const authSlice = createSlice({
@@ -42,7 +44,7 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action: PayloadAction<{ token: string; refreshToken: string }>) => {
-            
+
             const { token, refreshToken } = action.payload
             const decodedToken: DecodedToken = jwtDecode(token)
 
@@ -53,25 +55,24 @@ const authSlice = createSlice({
             state.role = decodedToken.role
             state.fullname = decodedToken.fullname
             state.email = decodedToken.sub
+            state.userId = Number(decodedToken.userId)
         },
         logout: (state) => {
             localStorage.removeItem('token')
-            state.loading = false
+            // state.loading = false
             state.isAuthenticated = false
             state.token = null
             state.refreshToken = null
             state.role = null
             state.fullname = null
             state.email = null
+            state.userId = null
         }
     },
     extraReducers: (builder) => {
 
-        builder.addCase(fetchAccount.pending, (state, action) => {
-            if (action.payload) {
-                state.loading = true
-                state.isAuthenticated = false
-            }
+        builder.addCase(fetchAccount.pending, (state) => {
+            state.loading = true
         })
 
         builder.addCase(fetchAccount.fulfilled, (state, action) => {
@@ -81,15 +82,14 @@ const authSlice = createSlice({
                 state.email = action.payload.data.email
                 state.fullname = action.payload.data.fullname
                 state.role = action.payload.data.role
+                state.userId = action.payload.data.id
             }
         })
 
-        builder.addCase(fetchAccount.rejected, (state, action) => {
+        builder.addCase(fetchAccount.rejected, (state) => {
             localStorage.removeItem('token')
-            if (action.payload) {
-                state.loading = false
-                state.isAuthenticated = false
-            }
+            state.loading = false
+            state.isAuthenticated = false
         })
     }
 })

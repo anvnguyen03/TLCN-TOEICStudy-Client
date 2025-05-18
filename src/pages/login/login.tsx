@@ -14,6 +14,7 @@ import { login } from "../../store/authSlice";
 import { AxiosError } from "axios";
 import { ApiResponse } from "../../types/type";
 import { useAppSelector } from "../../hooks/reduxHooks";
+import logo from "../../assets/Logo.svg"
 
 interface FormData {
     email: string,
@@ -164,7 +165,17 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
             <div className="px-5 py-5 flex align-items-center justify-content-center h-screen">
                 <div className="surface-card shadow-2 p-4 border-round w-11 sm:w-8 md:w-6 lg:w-4">
-                    <h2 className="text-center">Login</h2>
+                    <Link to="/home"><img
+                        src={logo}
+                        alt="bastion-300"
+                        height="40"
+                        className="mr-0 lg:mr-6"
+                    /></Link>
+                    <h2 className="text-left">Login</h2>
+                    <div className="flex align-items-center field">
+                        <span className="text-600 font-medium line-height-3">Bạn chưa có tài khoản?</span>
+                        <Link to="/register" className="font-medium no-underline ml-2 text-primary cursor-pointer">Đăng ký!</Link>
+                    </div>
 
                     <FloatLabel className="my-5">
                         <div className="p-inputgroup">
@@ -190,7 +201,7 @@ export default function LoginPage() {
                         <label htmlFor="email">Email</label>
                     </FloatLabel>
 
-                    <FloatLabel className="my-5">
+                    <FloatLabel className="mt-5">
                         <Password
                             inputId="password"
                             name="password"
@@ -215,11 +226,9 @@ export default function LoginPage() {
                         <label htmlFor="password">Password</label>
                     </FloatLabel>
 
-                    <div className="flex align-items-center justify-content-between field">
-                        <span className="text-600 font-medium line-height-3">Bạn chưa có tài khoản?</span>
-                        <Link to="/register" className="font-medium no-underline ml-2 text-blue-500 cursor-pointer">Đăng ký ngay!</Link>
-                    </div>
-
+                    <Link to={"/forgot-password"} className="flex mt-2 text-primary justify-content-end text-sm no-underline">
+                        Quên mật khẩu?
+                    </Link>
                     <Button
                         label="Login"
                         className="w-full mt-3"

@@ -116,7 +116,7 @@ const AddFullTest = () => {
 
         try {
             const response = await ManageTestService.callUploadFullTest(formData)
-            clearResources()
+            cleanResources()
             toast.current?.show({
                 severity: "success",
                 summary: "Upload success",
@@ -128,7 +128,7 @@ const AddFullTest = () => {
                             <span className="font-bold text-900">{props.message.summary}</span>
                         </div>
                         <div className="font-medium text-lg my-3 text-900">New Test ID: {props.message.detail}</div>
-                        <Button className="p-button-sm flex" label="View" severity="success" onClick={() => navigate(`admin/test/${response.data}}`)}></Button>
+                        <Button className="p-button-sm flex" label="View" severity="success" onClick={() => window.location.href = `tests/${response.data}/practice-set-toeic-test-6`}></Button>
                     </div>
                 )
             })
@@ -140,10 +140,13 @@ const AddFullTest = () => {
         }
     }
 
-    const clearResources = () => {
+    const cleanResources = () => {
         setExcel([])
         setImages([])
         setAudios([])
+        excelUploadRef.current?.clear()
+        imageUploadRef.current?.clear()
+        audioUploadRef.current?.clear()
     }
 
     useEffect(() => {

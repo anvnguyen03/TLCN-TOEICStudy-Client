@@ -2,7 +2,9 @@
     width: 100%;
     min-width: 100%;
     margin-bottom: 1.5rem;
-    will-change: min-height;
+    position: sticky;
+    top: 5rem;
+    /* height: fit-content; */
 }
 
 @media screen and (min-width: 768px) {
@@ -14,14 +16,9 @@
 }
 
 .test-navigation__inner {
-    position: relative;
-    transform: translate(0);
-    transform: translateZ(0);
-    will-change: position, transform;
     padding: 1rem;
     background-color: #fff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 4px 12px rgba(0, 0, 0, .08);
-    transition: transform 0.3s ease, position 0.3s ease, top 0.3s ease;
   }
 
 .test-content {
@@ -39,27 +36,6 @@
     border: 1px solid #e0e0e0;
     box-shadow: 0 4px 0 0 rgba(143, 156, 173, .2);
 }
-
-/* Khi trang cuộn ở đầu */
-.test-navigation__inner.relative {
-    position: relative;
-    transform: translate3d(0px, 0px, 0px);
-  }
-  
-  /* Khi thẻ cuộn theo trang */
-  .test-navigation__inner.scroll {
-    position: relative;
-    transform: translate3d(0px, 318px, 0px);
-  }
-  
-  /* Khi thẻ đã cố định */
-  .test-navigation__inner.fixed {
-    position: fixed;
-    top: auto;
-    bottom: 0px;
-    transform: translate3d(0px, 0px, 0px);
-    width: 200px;
-  }
 
 .question-twocols {
     display: flex;

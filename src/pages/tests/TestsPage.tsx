@@ -103,9 +103,13 @@ const TestsPage: React.FC = () => {
             <Toast ref={toast} />
             <Card
                 className="pt-5 pl-5 mb-3"
+                style={{ 
+                    backgroundImage: 'url(/test_page_background.png)',
+                    backgroundSize: 'cover',
+                }}
                 header={<div className="font-bold text-4xl" style={{ paddingLeft: '1.25rem' }}>Thư viện đề thi</div>}
             >
-                <label htmlFor="Keyword" className="font-bold text-400">Tìm kiếm đề thi</label>
+                <label htmlFor="Keyword" className="font-bold text-700">Tìm kiếm đề thi</label>
                 <div className="p-inputgroup flex-1 w-6 mt-2 mb-3">
                     <InputText placeholder="Keyword" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
                     <Button icon="pi pi-search" outlined raised severity="contrast" className="p-button-info" onClick={() => handleSearch()} />

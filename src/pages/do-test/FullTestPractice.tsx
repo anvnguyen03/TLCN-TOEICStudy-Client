@@ -20,9 +20,6 @@ const FullTestPractice: React.FC = () => {
     const navigate = useNavigate()
     const location = useLocation()
     const [loading, setLoading] = useState<boolean>(false)
-    const [scrollingState, setScrollingState] = useState<'relative' | 'scroll' | 'fixed'>('relative')
-    const testNavRef = useRef<HTMLDivElement>(null)
-    const testNavInnerRef = useRef<HTMLDivElement>(null)
     const qWrapperRefs = useRef<(HTMLDivElement | null)[]>([])
     const [scrollToQNum, setScrollToQNum] = useState<number>()
 
@@ -468,8 +465,8 @@ const FullTestPractice: React.FC = () => {
                     </a>
                 </h2>
                 <div className="flex relative">
-                    <div className="test-navigation" ref={testNavRef}>
-                        <div className={`test-navigation__inner ${scrollingState}`} ref={testNavInnerRef} >
+                    <div className="test-navigation">
+                        <div className={`test-navigation__inner`} >
                             <div className="flex flex-column timerWrapper my-2">
                                 <div className="text-center mb-4">Thời gian còn lại:</div>
                                 <DurationCountdown

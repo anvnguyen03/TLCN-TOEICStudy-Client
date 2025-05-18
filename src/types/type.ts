@@ -9,6 +9,7 @@ export interface IFetchAccount {
     email: string
     fullname: string
     role: string
+    id: number
 }
 
 // ------------------ type for DTO got from API response ------------------
@@ -155,6 +156,19 @@ export type ResultHistoryByTest = {
     testTitle: string
     userResults: UserResultDTO[]
 }
+
+export type CommentDTO = {
+    id: number
+    content: string
+    createdAt: string
+    updatedAt: string
+    userId: number
+    username: string
+    testId: number
+    parentId?: number
+    children: CommentDTO[]
+}
+
 // -------------------- Do-Test item type --------------------
 
 export type UserAnswerSheet = Map<OrderNumber, UserAnswer>
@@ -198,4 +212,11 @@ export type GetTestInfoPaginRequest = {
     testCategoryId?: number
     page: number
     size: number
+}
+
+export type CommentRequest = {
+    content: string
+    userId: number
+    testId: number
+    parentId?: number
 }

@@ -1,29 +1,39 @@
-import React from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { RootState } from '../store/store'
+import { useAppSelector } from '../hooks/reduxHooks';
 
-interface ProtectedRouteProps {
-  allowedRoles: string[]
-  redirectIfAuthenticated?: string // Trang mà người dùng sẽ được điều hướng đến nếu đã đăng nhập
-}
-
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, redirectIfAuthenticated  }) => {
-  const { isAuthenticated, role } = useSelector((state: RootState) => state.auth)
-
-  if (isAuthenticated && redirectIfAuthenticated) {
-    return <Navigate to={redirectIfAuthenticated} replace />
-  }
+// Protected Route cho User (USER hoặc ADMIN)
+export const ProtectedUserRoute = ({ children }: { children: JSX.Element }) => {
+  const { isAuthenticated, role } = useAppSelector((state) => state.auth);
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    return <Navigate to="/login" replace />;
   }
 
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />
+  if (role !== 'USER' && role !== 'ADMIN') {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />
-}
+  return children ? children : <Outlet />;
+};
 
-export default ProtectedRoute
+// Protected Route cho Admin (chỉ ADMIN)
+export const ProtectedAdminRoute = ({ children }: { children: JSX.Element }) => {
+  const auth = useAppSelector((state) => state.auth);
+
+  if (!auth.isAuthenticated) {
+    // Nếu chưa đăng nhập, điều hướng về trang login
+    return <Navigate to="/login" replace />;
+  }
+
+  if (auth.role !== 'ADMIN') {
+    // Nếu không phải ADMIN, điều hướng về unauthorized
+    return <Navigate to="/unauthorized" replace />;
+  }
+
+  return children ? children : <Outlet />;
+};
+
+// Route công khai (không yêu cầu đăng nhập)
+export const PublicRoute = ({ children }: { children: JSX.Element }) => {
+  return children;
+};

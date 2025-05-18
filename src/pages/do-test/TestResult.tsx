@@ -351,13 +351,13 @@ const TestResult: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="card pt-2">
+                    {/* <div className="card pt-2">
                         <div className="p-card p-component">
                             <div className="p-card-body">
                                 <h1 className="text-black-alpha-90">Comment</h1>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </React.Fragment>
             }
         </UserLayout>
