@@ -13,6 +13,57 @@ export interface IFetchAccount {
 }
 
 // ------------------ type for DTO got from API response ------------------
+
+export interface CourseInfoDTO {
+    id: number;
+    title: string;
+    rating: number;
+    totalReviews: number;
+    students: number;
+    objective: string;
+    description: string;
+    previewVideoUrl: string;
+    thumbnailUrl: string;
+    price: number;
+    duration: number;
+    totalSections: number;
+    totalLessons: number;
+    sections: {
+        id: number;
+        title: string;
+        orderIndex: number;
+        totalLessons: number;
+        duration: number;
+        lessons: {
+            id: number;
+            title: string;
+            orderIndex: number;
+            duration: number;
+            type: string | null;
+            free: boolean;
+        }[];
+    }[];
+}
+
+export interface CourseReviewDTO {
+    id: number;
+    username: string;
+    comment: string;
+    rating: number;
+    createdAt: string;
+}
+
+export type CourseCardDTO = {
+    id: number
+    title: string
+    lessons: number
+    students: number
+    level: string
+    rating: number
+    price: number
+    image: string
+}
+
 export enum ETestStatus {
     DRAFT = 'DRAFT',
 	PUBLISHED = 'PUBLISHED',
