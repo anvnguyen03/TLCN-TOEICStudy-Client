@@ -1,14 +1,14 @@
 import React, { useContext } from "react";
 import TopBar from "../../components/course/TopBar";
-import CourseContentSidebar from "../../components/course/CourseContentSidebar";
-import CourseBody from "../../components/course/CourseBody";
-import { CourseContext } from "../../context/CourseContext";
+import { CourseTrialContext } from "../../context/CourseTrialContext";
+import CourseContentSidebarTrial from "../../components/course/course trial/CourseContentSidebarTrial";
+import CourseTrialBody from "../../components/course/course trial/CourseTrialBody";
 
 const SIDEBAR_WIDTH = 300;
 const SIDEBAR_COLLAPSED_WIDTH = 0;
 
-const CourseLearn: React.FC = () => {
-    const context = useContext(CourseContext);
+const CourseTrial: React.FC = () => {
+    const context = useContext(CourseTrialContext);
     if (!context) return null;
     const { isSidebarOpen, setIsSidebarOpen } = context;
 
@@ -39,7 +39,7 @@ const CourseLearn: React.FC = () => {
                             height: '100%',
                         }}
                     >
-                        <CourseContentSidebar />
+                        <CourseContentSidebarTrial />
                     </div>
                     {/* Expand button overlays when collapsed */}
                     {!isSidebarOpen && (
@@ -65,11 +65,11 @@ const CourseLearn: React.FC = () => {
                     )}
                 </div>
                 <div className="flex-1 flex flex-column" style={{ minWidth: 0 }}>
-                    <CourseBody />
+                    <CourseTrialBody />
                 </div>
             </div>
         </div>
     )
 }
 
-export default CourseLearn
+export default CourseTrial; 

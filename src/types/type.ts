@@ -14,6 +14,37 @@ export interface IFetchAccount {
 
 // ------------------ type for DTO got from API response ------------------
 
+export interface QuizQuestion {
+    id: number;
+    type: 'MULTIPLE_CHOICE' | 'CARD_MATCHING';
+    orderIndex: number;
+    question: string;
+    option?: {
+      id: number;
+      orderIndex: number;
+      optionText1: string;
+      optionText2: string;
+      optionText3: string;
+    };
+    pairs?: {
+      prompts: { id: number; content: string }[];
+      answers: { content: string }[];
+    };
+  }
+  
+  export interface Lesson {
+    id: number;
+    title: string;
+    description: string | null;
+    type: 'VIDEO' | 'TEXT' | 'QUIZ';
+    duration: number;
+    orderIndex: number;
+    isFree: boolean;
+    content: string | null;
+    videoUrl: string | null;
+    quizQuestions: QuizQuestion[];
+  }
+
 export interface CourseInfoDTO {
     id: number;
     title: string;
@@ -270,4 +301,40 @@ export type CommentRequest = {
     userId: number
     testId: number
     parentId?: number
+}
+
+// Quiz Trial Types
+export interface TrialMultipleChoiceAnswerRequest {
+  quizQuestionId: number;
+  selectedOption: string;
+}
+
+export interface TrialCardMatchingAnswerRequest {
+  quizQuestionId: number;
+  pairs: {
+    promptId: number;
+    answerContent: string;
+  }[];
+}
+
+export interface TrialMultipleChoiceResult {
+  totalQuestions: number;
+  correctAnswers: number;
+  results: {
+    quizQuestionId: number;
+    correctOption: string;
+    selectedOption: string;
+    correct: boolean;
+  }[];
+}
+
+export interface TrialCardMatchingResult {
+  totalPairs: number;
+  correctPairs: number;
+  results: {
+    promptId: number;
+    selectedAnswer: string;
+    correctAnswer: string;
+    correct: boolean;
+  }[];
 }

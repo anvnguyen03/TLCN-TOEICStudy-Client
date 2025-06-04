@@ -67,20 +67,20 @@ const CourseContentSidebar: React.FC = () => {
                 onClick={() => setIsSidebarOpen(false)}
                 style={{
                     position: 'absolute',
-                    left: -18,
+                    right: 0,
                     top: 16,
                     zIndex: 10,
                     background: '#6d28d2',
                     color: '#fff',
                     border: 'none',
-                    borderRadius: '0 6px 6px 0',
+                    borderRadius: '6px 0 0 6px',
                     padding: '4px 8px',
                     cursor: 'pointer',
                     boxShadow: '2px 0 8px 0 rgba(0,0,0,0.04)'
                 }}
                 aria-label="Collapse sidebar"
             >
-                <i className="pi pi-angle-left" style={{ fontSize: 18 }}></i>
+                <i className="pi pi-angle-left" style={{ fontSize: 20 }}></i>
             </button>
             <div className="mb-4">
                 <div className="flex align-items-center justify-content-between mb-2">

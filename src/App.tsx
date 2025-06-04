@@ -29,8 +29,8 @@ import Profile from './pages/profile/Profile'
 import Courses from './pages/courses/courses'
 import CourseInfo from './pages/courses/CourseInfo'
 import { ProtectedAdminRoute, ProtectedUserRoute, PublicRoute } from './components/ProtectedRoute'
-import CourseLearn from './pages/courses/CourseLearn'
 import CourseLearnWrapper from './components/course/CourseLearnWrapper'
+import CourseTrialWrapper from './components/course/course trial/CourseTrialWrapper'
 
 function App() {
 
@@ -65,6 +65,7 @@ function App() {
         <Route path="/forgot-password/verify" element={<PublicRoute><ResetPassword /></PublicRoute>} />
         <Route path="/courses" element={<PublicRoute><Courses /></PublicRoute>} />
         <Route path="/courses/:id" element={<PublicRoute><CourseInfo /></PublicRoute>} />
+        <Route path="/courses/:id/trial" element={<PublicRoute><CourseTrialWrapper /></PublicRoute>} />
 
         {/* Protected Routes for User */}
         <Route path="/profile" element={<ProtectedUserRoute><Profile /></ProtectedUserRoute>} />

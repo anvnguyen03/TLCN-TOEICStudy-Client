@@ -2,12 +2,14 @@ import { Rating } from 'primereact/rating';
 import './CourseInfo.css';
 import { UserLayout } from '../../layouts/user layouts/Userlayout';
 import { Button } from 'primereact/button';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { callGetCourseById, callGetCourseRecentReviews } from '../../services/CourseService';
 import ReactMarkdown from 'react-markdown';
 import { CourseInfoDTO, CourseReviewDTO } from '../../types/type';
+import { useAppSelector } from '../../hooks/reduxHooks';
+import { Toast } from 'primereact/toast';
 
 const CourseInfo = () => {
     const navigate = useNavigate();
@@ -16,6 +18,8 @@ const CourseInfo = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [reviews, setReviews] = useState<CourseReviewDTO[]>([]);
+    const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+    const toast = useRef<Toast>(null);
 
     // Trạng thái để mở rộng tất cả sections
     const [activeIndices, setActiveIndices] = useState<number[]>([]);
@@ -52,6 +56,40 @@ const CourseInfo = () => {
         setExpandAll(!expandAll);
     }
 
+    const handleEnrollClick = () => {
+        if (!isAuthenticated) {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'Authentication Required',
+                detail: (
+                    <div>
+                        Vui lòng <Link to="/login" state={{ from: window.location.pathname }} className="text-primary font-semibold">đăng nhập</Link> để tiếp tục
+                    </div>
+                ),
+                life: 3000
+            });
+            return;
+        }
+        navigate(`/courses/${id}/learn`);
+    };
+
+    const handleTrialClick = () => {
+        if (!isAuthenticated) {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'Authentication Required',
+                detail: (
+                    <div>
+                        Vui lòng <Link to="/login" state={{ from: window.location.pathname }} className="text-primary font-semibold">đăng nhập</Link> để tiếp tục
+                    </div>
+                ),
+                life: 3000
+            });
+            return;
+        }
+        navigate(`/courses/${id}/trial`);
+    };
+
     if (loading) {
         return <UserLayout><div>Loading...</div></UserLayout>;
     }
@@ -77,6 +115,7 @@ const CourseInfo = () => {
 
     return (
         <UserLayout>
+            <Toast ref={toast} />
             {/* Banner */}
             <div className="banner relative">
                 <img src={course.thumbnailUrl} alt={course.title} className="w-full h-20rem" style={{ objectFit: 'cover' }} />
@@ -154,11 +193,13 @@ const CourseInfo = () => {
                                             {section.lessons.map((lesson) => (
                                                 <li key={lesson.id} className="lesson-item">
                                                     <div className="lesson-title">
-                                                        <i className="pi pi-play-circle" style={{ marginRight: '8px' }} />
+                                                        {lesson.type === 'VIDEO' && <i className="pi pi-play-circle" style={{ marginRight: '8px' }} />}
+                                                        {lesson.type === 'TEXT' && <i className="pi pi-file-word" style={{ marginRight: '8px' }} />}
+                                                        {lesson.type === 'QUIZ' && <i className="pi pi-question-circle" style={{ marginRight: '8px' }} />}
                                                         {lesson.title}
                                                     </div>
                                                     <div className="lesson-details">
-                                                        {lesson.free && <span className="preview-label">Preview</span>}
+                                                        {lesson.free && <span className="preview-label text-primary" style={{ textDecoration: 'none' }}>Preview</span>}
                                                         <span>{formatDuration(lesson.duration)}</span>
                                                     </div>
                                                 </li>
@@ -222,12 +263,12 @@ const CourseInfo = () => {
                                     <Button
                                         label="ĐĂNG KÝ HỌC NGAY"
                                         className="btn btn-primary btn-block p-mt-2"
-                                        onClick={() => alert('Đăng ký học ngay!')}
+                                        onClick={handleEnrollClick}
                                     />
                                     <Button
                                         label="Học thử miễn phí"
                                         className="btn btn-outline-secondary btn-block p-mt-2"
-                                        onClick={() => navigate(`/courses/${id}/learn`)}
+                                        onClick={handleTrialClick}
                                     />
                                 </div>
 

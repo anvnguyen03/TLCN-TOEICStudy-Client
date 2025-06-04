@@ -1,52 +1,68 @@
 import React, { useContext, useState } from 'react';
 import { Button } from 'primereact/button';
+import { CourseTrialContext } from '../../../context/CourseTrialContext';
 import { TabView, TabPanel } from 'primereact/tabview';
-import { CourseContext } from '../../context/CourseContext';
-import 'primeflex/primeflex.css';
 import ReactPlayer from 'react-player';
+import 'primeflex/primeflex.css';
+import ReactMarkdown from 'react-markdown';
+import { callCheckMultipleChoiceAnswers, callCheckCardMatchingAnswers } from '../../../services/QuizTrialService';
 
 interface QuizQuestion {
+  id: number;
   question: string;
   options: string[];
   answer: number;
   type: 'multiple-choice' | 'card-matching';
-  pairs?: { prompt: string; answer: string }[];
+  pairs?: { 
+    prompt: { id: number; content: string }; 
+    answer: string 
+  }[];
 }
 
 interface QuizLessonProps {
   quiz: { questions: QuizQuestion[] };
   onComplete?: (passed: boolean) => void;
+  lessonId: number;
 }
 
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const arr = [...array]
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-      ;[arr[i], arr[j]] = [arr[j], arr[i]]
-  }
-  return arr
-}
-
-const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
+const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(quiz.questions.length).fill(null));
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Card-matching state
-  const [promptOrder, setPromptOrder] = useState<number[]>([]);
-  const [answerOrder, setAnswerOrder] = useState<number[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null);
   const [matches, setMatches] = useState<(number | null)[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState<boolean[]>([]);
 
-  // Re-initialize card-matching state when current question changes and it's card-matching
+  // Cleanup function to reset state
+  const resetState = () => {
+    setCurrent(0);
+    setAnswers(Array(quiz.questions.length).fill(null));
+    setScore(0);
+    setShowResult(false);
+    setSelectedPrompt(null);
+    setMatches([]);
+    setSubmitted(false);
+    setResult([]);
+  };
+
+  // Reset all state when lesson changes
+  React.useEffect(() => {
+    resetState();
+    return () => {
+      // Cleanup when component unmounts
+      resetState();
+    };
+  }, [lessonId, quiz.questions.length]);
+
+  // Initialize card-matching state when current question changes
   React.useEffect(() => {
     const q = quiz.questions[current];
     if (q.type === 'card-matching' && q.pairs) {
-      setPromptOrder(shuffleArray(q.pairs.map((_, i) => i)));
-      setAnswerOrder(shuffleArray(q.pairs.map((_, i) => i)));
       setMatches(Array(q.pairs.length).fill(null));
       setSelectedPrompt(null);
       setSubmitted(false);
@@ -91,23 +107,47 @@ const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
     setResult([]);
   };
 
-  const handleSubmit = () => {
-    if (quiz.questions[current].type === 'multiple-choice') {
-      let correct = 0;
-      quiz.questions.forEach((q, i) => {
-        if (answers[i] === q.answer) correct++;
-      });
-      setScore(correct);
-      setShowResult(true);
-      if (onComplete) onComplete(correct === quiz.questions.length);
-    } else {
-      const res = quiz.questions[current].pairs?.map((pair, i) => {
-        const answerIdx = matches[i];
-        return answerIdx !== null && pair.answer === quiz.questions[current].pairs![answerOrder[answerIdx]].answer;
-      }) || [];
-      setResult(res);
-      setSubmitted(true);
-      if (onComplete) onComplete(res.every(Boolean));
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      if (quiz.questions[current].type === 'multiple-choice') {
+        // Prepare multiple choice answers
+        const multipleChoiceAnswers = quiz.questions.map((q, i) => ({
+          quizQuestionId: q.id,
+          selectedOption: q.options[answers[i] || 0]
+        }));
+
+        const response = await callCheckMultipleChoiceAnswers(multipleChoiceAnswers);
+        const result = response.data;
+        
+        setScore(result.correctAnswers);
+        setShowResult(true);
+        if (onComplete) onComplete(result.correctAnswers === result.totalQuestions);
+      } else {
+        // Prepare card matching answer
+        const cardMatchingAnswer = {
+          quizQuestionId: quiz.questions[current].id,
+          pairs: quiz.questions[current].pairs?.map(pair => ({
+            promptId: pair.prompt.id,
+            answerContent: pair.answer
+          })) || []
+        };
+
+        const response = await callCheckCardMatchingAnswers(cardMatchingAnswer);
+        const result = response.data;
+        
+        const results = result.results.map(r => r.correct);
+        setResult(results);
+        setSubmitted(true);
+        if (onComplete) onComplete(result.correctPairs === result.totalPairs);
+      }
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+      // Handle error appropriately
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -117,10 +157,14 @@ const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
       setShowResult(false);
       setCurrent(0);
     } else {
-      setMatches(Array(quiz.questions[current].pairs?.length || 0).fill(null));
-      setSubmitted(false);
-      setResult([]);
-      setSelectedPrompt(null);
+      // Reset only the current card matching question
+      const q = quiz.questions[current];
+      if (q.type === 'card-matching' && q.pairs) {
+        setMatches(Array(q.pairs.length).fill(null));
+        setSelectedPrompt(null);
+        setSubmitted(false);
+        setResult([]);
+      }
     }
     if (onComplete) onComplete(false);
   };
@@ -197,17 +241,17 @@ const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
       <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div>
           <div className="mb-2" style={{ fontWeight: 700, color: '#6d28d2' }}>Prompts</div>
-          {promptOrder.map((pIdx, i) => (
+          {quiz.questions[current].pairs?.map((pair, i) => (
             <div
-              key={pIdx}
+              key={i}
               className={`p-3 border-1 border-round mb-2 cursor-pointer ${selectedPrompt === i ? 'border-primary' : 'border-gray-300'} ${matches[i] !== null ? 'bg-gray-200' : ''}`}
               style={{ borderColor: selectedPrompt === i ? '#a78bfa' : '#d1d5db', background: matches[i] !== null ? '#f6f3ff' : '#fff', minHeight: 60, opacity: submitted && !result[i] ? 0.6 : 1 }}
               onClick={() => handlePromptClick(i)}
             >
-              {q.pairs![pIdx].prompt}
+              {pair.prompt.content}
               {matches[i] !== null && (
                 <span className="ml-2 text-xs" style={{ color: '#a78bfa' }}>
-                  → {q.pairs![answerOrder[matches[i]!]].answer}
+                  → {pair.answer}
                 </span>
               )}
               {submitted && result[i] !== undefined && (
@@ -218,19 +262,19 @@ const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
         </div>
         <div>
           <div className="mb-2" style={{ fontWeight: 700, color: '#6d28d2' }}>Answers</div>
-          {answerOrder.map((aIdx, i) => {
+          {quiz.questions[current].pairs?.map((pair, i) => {
             const matchedPrompt = matches.findIndex(m => m === i);
             return (
               <div
-                key={aIdx}
+                key={i}
                 className={`p-3 border-1 border-round mb-2 cursor-pointer ${matchedPrompt !== -1 ? 'bg-gray-200' : ''}`}
                 style={{ background: matchedPrompt !== -1 ? '#f6f3ff' : '#fff', minHeight: 60, opacity: submitted && matchedPrompt === -1 ? 0.6 : 1 }}
                 onClick={() => handleAnswerClick(i)}
               >
-                {q.pairs![aIdx].answer}
+                {pair.answer}
                 {matchedPrompt !== -1 && (
                   <span className="ml-2 text-xs" style={{ color: '#a78bfa' }}>
-                    ← {q.pairs![promptOrder[matchedPrompt]].prompt.slice(0, 12)}...
+                    ← {quiz.questions[current].pairs![matchedPrompt].prompt.content.slice(0, 12)}...
                   </span>
                 )}
               </div>
@@ -255,47 +299,73 @@ const QuizLesson = ({ quiz, onComplete }: QuizLessonProps) => {
 };
 
 const CourseBody: React.FC = () => {
-  const context = useContext(CourseContext);
-  const [quizPassed, setQuizPassed] = useState(false);
+  const context = useContext(CourseTrialContext);
+  // Add key to force remount of QuizLesson when lesson changes
+  const [quizKey, setQuizKey] = useState(0);
+
+  // Reset quiz key when lesson changes
+  React.useEffect(() => {
+    if (context) {
+      setQuizKey(prev => prev + 1);
+    }
+  }, [context?.currentLesson.lessonIndex]);
+
   if (!context) return null;
 
-  const { currentLesson, setCurrentLesson, sections, markLessonCompleted, isLessonCompleted } = context;
-  const { sectionIndex, lessonIndex } = currentLesson;
-  const section = sections[sectionIndex];
-  const lesson = section.lessons[lessonIndex];
+  const { currentLesson, setCurrentLesson, lessons, isLoading, error } = context;
+  const { lessonIndex } = currentLesson;
+  const lesson = lessons[lessonIndex];
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <div className="text-white">Loading lessons...</div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <div className="text-white">{error}</div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!lesson) {
+    return (
+      <div className="flex align-items-center justify-content-center" style={{ height: '100vh' }}>
+        <div className="text-white">No lessons available</div>
+      </div>
+    );
+  }
 
   // Navigation logic
   const goToPreviousLesson = () => {
     if (lessonIndex > 0) {
-      setCurrentLesson({ sectionIndex, lessonIndex: lessonIndex - 1 });
-    } else if (sectionIndex > 0) {
-      const prevSection = sections[sectionIndex - 1];
-      setCurrentLesson({ sectionIndex: sectionIndex - 1, lessonIndex: prevSection.lessons.length - 1 });
+      // Force remount of quiz component
+      setQuizKey(prev => prev + 1);
+      setCurrentLesson({ lessonIndex: lessonIndex - 1 });
     }
   };
 
   const goToNextLesson = () => {
-    if (!isLessonCompleted(lesson.id) && lesson.type !== 'quiz') {
-      markLessonCompleted(lesson.id);
-    }
-    if (lessonIndex < section.lessons.length - 1) {
-      setCurrentLesson({ sectionIndex, lessonIndex: lessonIndex + 1 });
-    } else if (sectionIndex < sections.length - 1) {
-      setCurrentLesson({ sectionIndex: sectionIndex + 1, lessonIndex: 0 });
+    if (lessonIndex < lessons.length - 1) {
+      // Force remount of quiz component
+      setQuizKey(prev => prev + 1);
+      setCurrentLesson({ lessonIndex: lessonIndex + 1 });
     }
   };
 
   // For disabling navigation
-  const isFirstLesson = sectionIndex === 0 && lessonIndex === 0;
-  const isLastLesson = sectionIndex === sections.length - 1 && lessonIndex === section.lessons.length - 1;
-  const isQuiz = lesson.type === 'quiz';
+  const isFirstLesson = lessonIndex === 0;
+  const isLastLesson = lessonIndex === lessons.length - 1;
 
-  // For quiz, mark as completed only when passed
   const handleQuizComplete = (passed: boolean) => {
-    setQuizPassed(passed);
-    if (passed && !isLessonCompleted(lesson.id)) {
-      markLessonCompleted(lesson.id);
-    }
+    console.log('Quiz completed:', passed);
   };
 
   return (
@@ -315,24 +385,46 @@ const CourseBody: React.FC = () => {
           icon="pi pi-chevron-right"
           iconPos="right"
           onClick={goToNextLesson}
-          disabled={isLastLesson || (isQuiz && !quizPassed)}
+          disabled={isLastLesson}
           className="p-button-text p-button-lg"
         />
       </div>
 
       {/* Video, text, or quiz lesson */}
       <div className="lesson-media mb-4" style={{ borderRadius: '1rem', overflow: 'hidden', background: '#23243a', boxShadow: '0 2px 16px 0 rgba(0,0,0,0.10)' }}>
-        {lesson.type === 'video' && lesson.url &&
+        {lesson.type === 'VIDEO' && lesson.videoUrl && (
           <div className="p-mb-4">
             <ReactPlayer
-              url={lesson.url}
+              url={lesson.videoUrl}
               controls
               width="100%"
             />
           </div>
-        }
-        {lesson.type === 'text' && <div className="p-4 text-base" style={{ color: '#fff' }}>{lesson.content}</div>}
-        {lesson.type === 'quiz' && lesson.quiz && <QuizLesson quiz={lesson.quiz} onComplete={handleQuizComplete} />}
+        )}
+        {lesson.type === 'TEXT' && <div className="p-4 text-base" style={{ color: '#000', background: '#fff' }}>
+          <ReactMarkdown>{lesson.content}</ReactMarkdown>
+        </div>}
+        {lesson.type === 'QUIZ' && lesson.quizQuestions && (
+          <div key={quizKey}>
+            <QuizLesson
+              quiz={{
+                questions: lesson.quizQuestions.map(q => ({
+                  id: q.id,
+                  question: q.question,
+                  options: q.option ? [q.option.optionText1, q.option.optionText2, q.option.optionText3] : [],
+                  answer: 0,
+                  type: q.type === 'MULTIPLE_CHOICE' ? 'multiple-choice' : 'card-matching',
+                  pairs: q.pairs ? q.pairs.prompts.map((p, i) => ({
+                    prompt: { id: p.id, content: p.content },
+                    answer: q.pairs!.answers[i].content
+                  })) : undefined
+                }))
+              }}
+              lessonId={lesson.id}
+              onComplete={handleQuizComplete}
+            />
+          </div>
+        )}
       </div>
 
       {/* Tabs for Overview, Notes, Reviews */}
@@ -340,7 +432,7 @@ const CourseBody: React.FC = () => {
         <TabPanel header="Overview">
           <div style={{ color: '#23243a', background: 'transparent', padding: '0 0 2rem 0' }}>
             {/* Course Title & Description */}
-            <h2 style={{ fontWeight: 700, fontSize: '2rem', marginBottom: 8 }}>{section.title.replace('Section 1: ', '') || 'Course Overview'}</h2>
+            <h2 style={{ fontWeight: 700, fontSize: '2rem', marginBottom: 8 }}>Course Overview</h2>
             <p style={{ color: '#444', fontSize: '1.1rem', marginBottom: 16 }}>
               Welcome to the TOEIC Study course! This comprehensive course is designed to help you master the skills needed to excel in the TOEIC exam, with engaging lessons, quizzes, and practical exercises.
             </p>
@@ -348,11 +440,8 @@ const CourseBody: React.FC = () => {
             {/* Course Stats */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', fontSize: '1rem', color: '#555', marginBottom: 16 }}>
               <div><strong>Level:</strong> Beginner to Advanced</div>
-              <div><strong>Lectures:</strong> {sections.reduce((sum, sec) => sum + sec.lectures, 0)}</div>
-              <div><strong>Duration:</strong> {sections.reduce((sum, sec) => {
-                const mins = parseInt(sec.duration) || 0;
-                return sum + mins;
-              }, 0)} min</div>
+              <div><strong>Lectures:</strong> {lessons.length}</div>
+              <div><strong>Duration:</strong> {lessons.reduce((sum, lesson) => sum + lesson.duration, 0)} min</div>
               <div><strong>Language:</strong> English</div>
             </div>
 
@@ -368,9 +457,10 @@ const CourseBody: React.FC = () => {
             {/* Course Content Summary */}
             <h3 style={{ fontWeight: 600, fontSize: '1.1rem', margin: '24px 0 8px 0' }}>Course Content</h3>
             <ul style={{ color: '#23243a', fontSize: '1rem', paddingLeft: 20 }}>
-              {sections.map((sec, idx) => (
+              {lessons.map((lesson, idx) => (
                 <li key={idx} style={{ marginBottom: 6 }}>
-                  <span style={{ fontWeight: 600 }}>{sec.title.replace('Section ', 'Section ')}</span> — {sec.lectures} lectures • {sec.duration}
+                  <span style={{ fontWeight: 600 }}>{lesson.title}</span>
+                  <span style={{ marginLeft: 8, color: '#666' }}>— {lesson.duration} min</span>
                 </li>
               ))}
             </ul>

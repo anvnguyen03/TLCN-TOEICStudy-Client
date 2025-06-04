@@ -18,6 +18,7 @@ interface Lesson {
   quiz?: {
     questions: QuizQuestion[];
   };
+  free?: boolean;
 }
 
 interface Section {
@@ -25,12 +26,6 @@ interface Section {
   duration: string;
   lectures: number;
   lessons: Lesson[];
-}
-
-interface Note {
-  time: number;
-  content: string;
-  lessonId: number;
 }
 
 interface CurrentLessonPointer {
@@ -44,10 +39,6 @@ interface CourseContextType {
   sections: Section[];
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
-  notes: Note[];
-  addNote: (note: string) => void;
-  videoTime: number;
-  setVideoTime: (time: number) => void;
   completedLessons: { [lessonId: number]: boolean };
   markLessonCompleted: (lessonId: number) => void;
   isLessonCompleted: (lessonId: number) => boolean;
@@ -58,8 +49,6 @@ export const CourseContext = createContext<CourseContextType | undefined>(undefi
 export const CourseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [currentLesson, setCurrentLesson] = useState<CurrentLessonPointer>({ sectionIndex: 0, lessonIndex: 0 });
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [videoTime, setVideoTime] = useState<number>(0);
   const [completedLessons, setCompletedLessons] = useState<{ [lessonId: number]: boolean }>({ 1: true }); // Only first lesson unlocked
 
   const sections: Section[] = [
@@ -68,8 +57,8 @@ export const CourseProvider: React.FC<{ children: ReactNode }> = ({ children }) 
       duration: '3min',
       lectures: 4,
       lessons: [
-        { id: 1, title: 'Welcome To This Course', duration: '3min', type: 'video', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ' },
-        { id: 2, title: 'READ BEFORE YOU START!', duration: '1min', type: 'text', content: 'Some text content...' },
+        { id: 1, title: 'Welcome To This Course', duration: '3min', type: 'video', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', free: true },
+        { id: 2, title: 'READ BEFORE YOU START!', duration: '1min', type: 'text', content: 'Some text content...', free: true },
         { id: 3, title: 'E-Book Resources 2.0', duration: '1min', type: 'text', content: 'E-book content...' },
         {
           id: 4,
@@ -127,14 +116,10 @@ export const CourseProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     // ...more sections
   ];
 
-  const getCurrentLessonId = () => {
-    const { sectionIndex, lessonIndex } = currentLesson;
-    return sections[sectionIndex]?.lessons[lessonIndex]?.id;
-  };
-
-  const addNote = (note: string) => {
-    setNotes([...notes, { time: videoTime, content: note, lessonId: getCurrentLessonId() }]);
-  };
+  // const getCurrentLessonId = () => {
+  //   const { sectionIndex, lessonIndex } = currentLesson;
+  //   return sections[sectionIndex]?.lessons[lessonIndex]?.id;
+  // };
 
   const markLessonCompleted = (lessonId: number) => {
     setCompletedLessons((prev) => ({ ...prev, [lessonId]: true }));
@@ -150,10 +135,6 @@ export const CourseProvider: React.FC<{ children: ReactNode }> = ({ children }) 
         sections,
         isSidebarOpen,
         setIsSidebarOpen,
-        notes,
-        addNote,
-        videoTime,
-        setVideoTime,
         completedLessons,
         markLessonCompleted,
         isLessonCompleted,
