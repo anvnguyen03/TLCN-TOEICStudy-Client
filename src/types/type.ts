@@ -1,8 +1,8 @@
 export interface ApiResponse<T> {
     status: string
     message: string
-    data: T
-    error: string | null
+    data?: T
+    error?: string | null
 }
 
 export interface IFetchAccount {
@@ -226,12 +226,33 @@ export type TestCategoryDTO = {
     name: string
 }
 
-export type UserDTO = {
+export interface UserDTO {
     id: number
     fullname: string
     email: string
     role: string
     activated: boolean
+    enabled?: boolean
+    authorities?: {
+        authority: string
+    }[]
+    username?: string
+    accountNonExpired?: boolean
+    accountNonLocked?: boolean
+    credentialsNonExpired?: boolean
+    
+    // Personal Information
+    phone?: string
+    address?: string
+    dateOfBirth?: string
+    gender?: 'MALE' | 'FEMALE' | 'OTHER'
+    avatar?: string
+    
+    // Education Information
+    education?: string
+    occupation?: string
+    englishLevel?: string
+    targetScore?: number
 }
 
 export type ResultHistoryByTest = {
@@ -337,4 +358,53 @@ export interface TrialCardMatchingResult {
     correctAnswer: string;
     correct: boolean;
   }[];
+}
+export interface UpdateUserRequest {
+    userId: number
+    fullname: string
+    email: string
+    role: string
+    activated: boolean
+    
+    // Personal Information
+    phone?: string
+    address?: string
+    dateOfBirth?: string
+    gender?: 'MALE' | 'FEMALE' | 'OTHER'
+    avatar?: string
+    
+    // Education Information
+    education?: string
+    occupation?: string
+    englishLevel?: string
+    targetScore?: number
+}
+
+export interface PaginatedResponse<T> {
+    content: T[]
+    pageable: {
+        pageNumber: number
+        pageSize: number
+        sort: {
+            empty: boolean
+            sorted: boolean
+            unsorted: boolean
+        }
+        offset: number
+        paged: boolean
+        unpaged: boolean
+    }
+    totalPages: number
+    totalElements: number
+    last: boolean
+    size: number
+    number: number
+    sort: {
+        empty: boolean
+        sorted: boolean
+        unsorted: boolean
+    }
+    numberOfElements: number
+    first: boolean
+    empty: boolean
 }
