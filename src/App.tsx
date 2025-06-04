@@ -63,19 +63,18 @@ function App() {
         {/* </Route> */}
 
         {/* Protected Routes for Admin */}
-        {/* <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}> */}
-        <Route path='/admin' element={<Navigate to='/admin/dashboard' />} />
-        <Route path="admin" element={<Outlet />} >
-          <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="test-category" element={<AdminCategory />} />
-          <Route path="test" element={<AdminTest />} />
-          <Route path="test/add" element={<AdminAddTest />} />
-          <Route path="test/add/full-test" element={<AddFullTest />} />
-
-          <Route path="user" element={<AdminAccount />} />
-          <Route path="user-result" element={<AdminTestResult />} />
+        <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+          <Route path='/admin' element={<Navigate to='/admin/dashboard' />} />
+          <Route path="admin" element={<Outlet />} >
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="test-category" element={<AdminCategory />} />
+            <Route path="test" element={<AdminTest />} />
+            <Route path="test/add" element={<AdminAddTest />} />
+            <Route path="test/add/full-test" element={<AddFullTest />} />
+            <Route path="user" element={<AdminAccount />} />
+            <Route path="user-result" element={<AdminTestResult />} />
+          </Route>
         </Route>
-        {/* </Route> */}
       </Routes>
     </BrowserRouter>
   )

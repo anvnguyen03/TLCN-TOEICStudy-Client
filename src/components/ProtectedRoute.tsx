@@ -20,7 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles, redirectI
   }
 
   if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />
+    return <Navigate to="/home" replace />
   }
 
   return <Outlet />
