@@ -10,6 +10,10 @@ import ReactMarkdown from 'react-markdown';
 import { CourseInfoDTO, CourseReviewDTO } from '../../types/type';
 import { useAppSelector } from '../../hooks/reduxHooks';
 import { Toast } from 'primereact/toast';
+import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { callCreateVNPayPayment } from '../../services/PaymentService';
+import { AxiosError } from 'axios';
+import { callCheckCourseEnrollment } from '../../services/UserService';
 
 const CourseInfo = () => {
     const navigate = useNavigate();
@@ -19,6 +23,8 @@ const CourseInfo = () => {
     const [error, setError] = useState<string | null>(null);
     const [reviews, setReviews] = useState<CourseReviewDTO[]>([]);
     const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+    const userId = useAppSelector(state => state.auth.userId);
+    const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
     const toast = useRef<Toast>(null);
 
     // Trạng thái để mở rộng tất cả sections
@@ -35,8 +41,14 @@ const CourseInfo = () => {
                     callGetCourseById(parseInt(id)),
                     callGetCourseRecentReviews(parseInt(id))
                 ]);
-                setCourse(courseResponse.data);
-                setReviews(reviewsResponse.data);
+                setCourse(courseResponse?.data || null);
+                setReviews(reviewsResponse?.data || []);
+
+                // Check enrollment status if user is authenticated
+                if (isAuthenticated) {
+                    const enrollmentResponse = await callCheckCourseEnrollment(parseInt(id));
+                    setIsEnrolled(enrollmentResponse.data || false);
+                }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Failed to fetch course data');
             } finally {
@@ -45,7 +57,7 @@ const CourseInfo = () => {
         };
 
         fetchCourseData();
-    }, [id]);
+    }, [id, isAuthenticated]);
 
     const handleExpandAll = () => {
         if (expandAll) {
@@ -56,7 +68,7 @@ const CourseInfo = () => {
         setExpandAll(!expandAll);
     }
 
-    const handleEnrollClick = () => {
+    const handleEnrollClick = async () => {
         if (!isAuthenticated) {
             toast.current?.show({
                 severity: 'warn',
@@ -70,6 +82,45 @@ const CourseInfo = () => {
             });
             return;
         }
+
+        confirmDialog({
+            message: `Xác nhận đi đến trang thanh toán?`,
+            header: `Xác nhận đăng ký khóa học "${course?.title}"`,
+            icon: 'pi pi-exclamation-triangle',
+            accept: async () => {
+                try {
+                    if (!course) return;
+                    const response = await callCreateVNPayPayment(userId!, course.id, course.price);
+                    if (response.status === 'OK' && response.data) {
+                        toast.current?.show({
+                            severity: 'success',
+                            summary: 'Thành công',
+                            detail: 'Đăng ký khóa học thành công!',
+                            sticky: true,
+                        });
+                        window.open(response.data, '_blank');
+                    } else {
+                        toast.current?.show({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại sau.',
+                            life: 3000
+                        });
+                    }
+                } catch (error: unknown) {
+                    const axiosError = error as AxiosError;
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: axiosError.message || 'Có lỗi xảy ra khi tạo thanh toán. Vui lòng thử lại sau.',
+                        life: 3000
+                    });
+                }
+            }
+        });
+    };
+
+    const handleStartLearning = () => {
         navigate(`/courses/${id}/learn`);
     };
 
@@ -116,6 +167,7 @@ const CourseInfo = () => {
     return (
         <UserLayout>
             <Toast ref={toast} />
+            <ConfirmDialog />
             {/* Banner */}
             <div className="banner relative">
                 <img src={course.thumbnailUrl} alt={course.title} className="w-full h-20rem" style={{ objectFit: 'cover' }} />
@@ -257,14 +309,40 @@ const CourseInfo = () => {
                                     <div className="course-prices-wrapper">
                                         <div className="course-prices-promo">Ưu đãi đặc biệt:</div>
                                         <div className="course-prices">
-                                            <span className="course-price">{formatPrice(course.price)}</span>
+                                            <span className="course-price">{formatPrice(course?.price || 0)}</span>
                                         </div>
                                     </div>
-                                    <Button
-                                        label="ĐĂNG KÝ HỌC NGAY"
-                                        className="btn btn-primary btn-block p-mt-2"
-                                        onClick={handleEnrollClick}
-                                    />
+                                    {isAuthenticated && isEnrolled ? (
+                                        <Button
+                                            label="HỌC NGAY"
+                                            className="btn btn-success btn-block p-mt-2"
+                                            onClick={handleStartLearning}
+                                            style={{ 
+                                                backgroundColor: '#22c55e',
+                                                borderColor: '#22c55e',
+                                                fontSize: '1.1rem',
+                                                fontWeight: 'bold',
+                                                boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                                                transition: 'all 0.2s ease-in-out'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.backgroundColor = '#16a34a';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.backgroundColor = '#22c55e';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)';
+                                            }}
+                                        />
+                                    ) : (
+                                        <Button
+                                            label="ĐĂNG KÝ HỌC NGAY"
+                                            className="btn btn-primary btn-block p-mt-2"
+                                            onClick={handleEnrollClick}
+                                        />
+                                    )}
                                     <Button
                                         label="Học thử miễn phí"
                                         className="btn btn-outline-secondary btn-block p-mt-2"

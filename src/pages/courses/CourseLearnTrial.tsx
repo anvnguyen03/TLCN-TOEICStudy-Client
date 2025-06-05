@@ -3,18 +3,21 @@ import TopBar from "../../components/course/TopBar";
 import { CourseTrialContext } from "../../context/CourseTrialContext";
 import CourseContentSidebarTrial from "../../components/course/course trial/CourseContentSidebarTrial";
 import CourseTrialBody from "../../components/course/course trial/CourseTrialBody";
+import { useParams } from "react-router-dom";
 
 const SIDEBAR_WIDTH = 300;
 const SIDEBAR_COLLAPSED_WIDTH = 0;
 
 const CourseTrial: React.FC = () => {
     const context = useContext(CourseTrialContext);
+    const { id } = useParams<{ id: string }>();
+    
     if (!context) return null;
-    const { isSidebarOpen, setIsSidebarOpen } = context;
+    const { isSidebarOpen, setIsSidebarOpen, courseInfo } = context;
 
     return (
         <div className="flex flex-column min-h-screen" style={{ background: '#181922' }}>
-            <TopBar />
+            <TopBar courseTitle={courseInfo?.title || ''} courseId={parseInt(id || '0')} />
             <div className="flex flex-row flex-1" style={{ minHeight: 'calc(100vh - 4rem)', position: 'relative' }}>
                 {/* Sidebar with smooth transition */}
                 <div

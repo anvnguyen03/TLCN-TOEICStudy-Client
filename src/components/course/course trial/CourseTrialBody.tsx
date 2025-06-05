@@ -122,9 +122,9 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
         const response = await callCheckMultipleChoiceAnswers(multipleChoiceAnswers);
         const result = response.data;
         
-        setScore(result.correctAnswers);
+        setScore(result?.correctAnswers || 0);
         setShowResult(true);
-        if (onComplete) onComplete(result.correctAnswers === result.totalQuestions);
+        if (onComplete) onComplete(result?.correctAnswers === result?.totalQuestions);
       } else {
         // Prepare card matching answer
         const cardMatchingAnswer = {
@@ -138,10 +138,10 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
         const response = await callCheckCardMatchingAnswers(cardMatchingAnswer);
         const result = response.data;
         
-        const results = result.results.map(r => r.correct);
+        const results = result?.results.map(r => r.correct) || [];
         setResult(results);
         setSubmitted(true);
-        if (onComplete) onComplete(result.correctPairs === result.totalPairs);
+        if (onComplete) onComplete(result?.correctPairs === result?.totalPairs);
       }
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -300,8 +300,8 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
 
 const CourseBody: React.FC = () => {
   const context = useContext(CourseTrialContext);
-  // Add key to force remount of QuizLesson when lesson changes
   const [quizKey, setQuizKey] = useState(0);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Reset quiz key when lesson changes
   React.useEffect(() => {
@@ -312,7 +312,7 @@ const CourseBody: React.FC = () => {
 
   if (!context) return null;
 
-  const { currentLesson, setCurrentLesson, lessons, isLoading, error } = context;
+  const { currentLesson, setCurrentLesson, lessons, courseInfo, isLoading, error } = context;
   const { lessonIndex } = currentLesson;
   const lesson = lessons[lessonIndex];
 
@@ -335,7 +335,7 @@ const CourseBody: React.FC = () => {
   }
 
   // Show empty state
-  if (!lesson) {
+  if (!lesson || !courseInfo) {
     return (
       <div className="flex align-items-center justify-content-center" style={{ height: '100vh' }}>
         <div className="text-white">No lessons available</div>
@@ -431,39 +431,66 @@ const CourseBody: React.FC = () => {
       <TabView className="custom-tabview" style={{ background: 'transparent' }}>
         <TabPanel header="Overview">
           <div style={{ color: '#23243a', background: 'transparent', padding: '0 0 2rem 0' }}>
-            {/* Course Title & Description */}
-            <h2 style={{ fontWeight: 700, fontSize: '2rem', marginBottom: 8 }}>Course Overview</h2>
-            <p style={{ color: '#444', fontSize: '1.1rem', marginBottom: 16 }}>
-              Welcome to the TOEIC Study course! This comprehensive course is designed to help you master the skills needed to excel in the TOEIC exam, with engaging lessons, quizzes, and practical exercises.
-            </p>
-
-            {/* Course Stats */}
+            {/* Course Title & Stats */}
+            <h2 style={{ fontWeight: 700, fontSize: '2rem', marginBottom: 8 }}>{courseInfo.title}</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', fontSize: '1rem', color: '#555', marginBottom: 16 }}>
-              <div><strong>Level:</strong> Beginner to Advanced</div>
-              <div><strong>Lectures:</strong> {lessons.length}</div>
-              <div><strong>Duration:</strong> {lessons.reduce((sum, lesson) => sum + lesson.duration, 0)} min</div>
-              <div><strong>Language:</strong> English</div>
+              <div><strong>Lectures:</strong> {courseInfo.totalLessons}</div>
+              <div><strong>Duration:</strong> {courseInfo.duration} min</div>
+            </div>
+
+            {/* Course Description */}
+            <div style={{ color: '#444', fontSize: '1.1rem', marginBottom: 16 }}>
+              <ReactMarkdown>{courseInfo.description}</ReactMarkdown>
             </div>
 
             {/* What You'll Learn */}
             <h3 style={{ fontWeight: 600, fontSize: '1.1rem', margin: '24px 0 8px 0' }}>What you'll learn</h3>
-            <ul style={{ color: '#23243a', fontSize: '1rem', paddingLeft: 20, marginBottom: 24 }}>
-              <li>Master TOEIC Listening and Reading strategies</li>
-              <li>Expand essential TOEIC vocabulary and grammar</li>
-              <li>Practice with real exam questions and detailed analysis</li>
-              <li>Develop effective listening and reading comprehension skills</li>
-            </ul>
+            <div style={{ color: '#23243a', fontSize: '1rem', marginBottom: 24 }}>
+              <ReactMarkdown>{courseInfo.objective}</ReactMarkdown>
+            </div>
 
             {/* Course Content Summary */}
             <h3 style={{ fontWeight: 600, fontSize: '1.1rem', margin: '24px 0 8px 0' }}>Course Content</h3>
-            <ul style={{ color: '#23243a', fontSize: '1rem', paddingLeft: 20 }}>
-              {lessons.map((lesson, idx) => (
-                <li key={idx} style={{ marginBottom: 6 }}>
-                  <span style={{ fontWeight: 600 }}>{lesson.title}</span>
-                  <span style={{ marginLeft: 8, color: '#666' }}>— {lesson.duration} min</span>
-                </li>
-              ))}
-            </ul>
+            <div style={{ 
+              maxHeight: isExpanded ? 'none' : '10px', 
+              overflow: 'hidden',
+              position: 'relative',
+              marginBottom: '1rem'
+            }}>
+              <ul style={{ color: '#23243a', fontSize: '1rem', paddingLeft: 20 }}>
+                {courseInfo.sections.map((section) => (
+                  <li key={section.id} style={{ marginBottom: 16 }}>
+                    <div style={{ fontWeight: 600, marginBottom: 8 }}>{section.title}</div>
+                    <ul style={{ paddingLeft: 20 }}>
+                      {section.lessons.map((lesson) => (
+                        <li key={lesson.id} style={{ marginBottom: 6 }}>
+                          <span style={{ fontWeight: 500 }}>{lesson.title}</span>
+                          <span style={{ marginLeft: 8, color: '#666' }}>— {lesson.duration} min</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+              {!isExpanded && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: '10px',
+                  background: 'linear-gradient(transparent, #fff)',
+                  pointerEvents: 'none'
+                }} />
+              )}
+            </div>
+            <Button 
+              label={isExpanded ? "Show Less" : "Show More"} 
+              icon={isExpanded ? "pi pi-chevron-up" : "pi pi-chevron-down"}
+              className="p-button-text" 
+              onClick={() => setIsExpanded(!isExpanded)}
+              style={{ color: '#6d28d2', fontWeight: 600 }}
+            />
           </div>
         </TabPanel>
         <TabPanel header="Reviews">
@@ -495,17 +522,6 @@ const CourseBody: React.FC = () => {
 
             {/* Reviews List */}
             <h3 style={{ fontWeight: 700, fontSize: '1.2rem', margin: '32px 0 16px 0' }}>Reviews</h3>
-            <div style={{ marginBottom: 24 }}>
-              <input type="text" placeholder="Search reviews" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #ccc', width: 260, marginRight: 16 }} />
-              <select style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #ccc' }}>
-                <option>All ratings</option>
-                <option>5 stars</option>
-                <option>4 stars</option>
-                <option>3 stars</option>
-                <option>2 stars</option>
-                <option>1 star</option>
-              </select>
-            </div>
             {/* Mock reviews data */}
             {[
               {

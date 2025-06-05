@@ -1,9 +1,18 @@
 import React from 'react';
 import "./TopBar.css"
+import { useNavigate } from 'react-router-dom';
 
-const TopBar: React.FC = () => {
+interface TopBarProps {
+    courseTitle: string;
+    courseId: number;
+}
 
-    const courseTitle = 'Web Design for Web Developers: Build Beautiful Websites!'
+const TopBar: React.FC<TopBarProps> = ({ courseTitle, courseId }) => {
+    const navigate = useNavigate();
+
+    const handleTitleClick = () => {
+        navigate(`/courses/${courseId}`);
+    };
 
     return (
         <div className='align-items-center flex justify-content-center' style={{ color: '#fff', backgroundColor: '#1d1e27', height: '4rem', borderBottom: '1px solid #595c73' }}>
@@ -17,7 +26,20 @@ const TopBar: React.FC = () => {
                     
                     <div className='flex flex-1' style={{ minWidth: '1px' }}>
                         <h1 className='max-w-full course-title' style={{ fontSize: 'inherit', fontWeight: 'normal' }}>
-                            <a href="/courses/0" className='course-title align-items-center' style={{ color: '#ffffff', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'normal' }}>{courseTitle}</a>
+                            <a 
+                                onClick={handleTitleClick}
+                                className='course-title align-items-center' 
+                                style={{ 
+                                    color: '#ffffff', 
+                                    textDecoration: 'none', 
+                                    overflow: 'hidden', 
+                                    textOverflow: 'ellipsis', 
+                                    whiteSpace: 'normal',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {courseTitle}
+                            </a>
                         </h1>
                         <div className='flex-1' style={{ minWidth: '1px'}}></div>
                     </div>

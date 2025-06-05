@@ -405,17 +405,6 @@ const CourseBody: React.FC = () => {
 
             {/* Reviews List */}
             <h3 style={{ fontWeight: 700, fontSize: '1.2rem', margin: '32px 0 16px 0' }}>Reviews</h3>
-            <div style={{ marginBottom: 24 }}>
-              <input type="text" placeholder="Search reviews" style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #ccc', width: 260, marginRight: 16 }} />
-              <select style={{ padding: '8px 12px', borderRadius: 6, border: '1px solid #ccc' }}>
-                <option>All ratings</option>
-                <option>5 stars</option>
-                <option>4 stars</option>
-                <option>3 stars</option>
-                <option>2 stars</option>
-                <option>1 star</option>
-              </select>
-            </div>
             {/* Mock reviews data */}
             {[
               {
