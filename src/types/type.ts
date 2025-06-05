@@ -562,3 +562,40 @@ export interface UserLearningDTO {
     rating?: number
     review?: string
 }
+
+export interface AdminDashboardStats {
+    // Key metrics
+    totalUsers: number
+    lastMonthUsers: number
+    totalRevenue: number
+    monthlyRevenue: number
+    lastMonthRevenue: number
+    testAttemps: number
+    lastMonthTestAttemps: number
+    courseEnrollments: number
+    lastMonthCourseEnrollments: number
+
+    // Top courses by rating
+    topCourses: {
+        id: number
+        title: string
+        enrollments: number
+        revenue: number
+        rating: number
+    }[]
+
+    // Chart data
+    revenueTrend: {
+        labels: string[]
+        data: number[]
+    }
+    userGrowth: {
+        labels: string[]
+        newUsers: number[]
+        activeUsers: number[]
+    }
+    testScoreDistribution: {
+        labels: string[]
+        data: number[]
+    }
+}

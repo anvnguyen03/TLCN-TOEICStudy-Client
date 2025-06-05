@@ -1,5 +1,4 @@
-"use client"
-
+import React, { useState, useEffect } from "react"
 import { BreadCrumb } from "primereact/breadcrumb"
 import { AdminLayout } from "../../../layouts/admin layouts/AdminLayout"
 import type { MenuItem } from "primereact/menuitem"
@@ -10,67 +9,16 @@ import { DataTable } from "primereact/datatable"
 import { Column } from "primereact/column"
 import { Button } from "primereact/button"
 import { Badge } from "primereact/badge"
-import { ProgressBar } from "primereact/progressbar"
-import { useState, useEffect } from "react"
-
-interface DashboardStats {
-    totalUsers: number
-    totalCourses: number
-    totalTests: number
-    totalRevenue: number
-    monthlyRevenue: number
-    activeUsers: number
-    completedTests: number
-    courseEnrollments: number
-}
-
-interface TopCourse {
-    id: number
-    title: string
-    enrollments: number
-    revenue: number
-    rating: number
-    completionRate: number
-}
+import { useNavigate } from "react-router-dom"
+import { AdminDashboardStats } from "../../../types/type"
+import { callGetDashboardStats } from "../../../services/admin services/AdminDashboardService"
+import { Toast } from "primereact/toast"
 
 const AdminDashboard = () => {
-    const [stats, setStats] = useState<DashboardStats>({
-        totalUsers: 1247,
-        totalCourses: 24,
-        totalTests: 156,
-        totalRevenue: 45680000,
-        monthlyRevenue: 8950000,
-        activeUsers: 892,
-        completedTests: 3421,
-        courseEnrollments: 2156,
-    })
-
-    const [topCourses] = useState<TopCourse[]>([
-        {
-            id: 1,
-            title: "TOEIC Listening & Reading Complete Course",
-            enrollments: 456,
-            revenue: 136800000,
-            rating: 4.8,
-            completionRate: 78,
-        },
-        {
-            id: 2,
-            title: "TOEIC Speaking & Writing Mastery",
-            enrollments: 324,
-            revenue: 97200000,
-            rating: 4.6,
-            completionRate: 65,
-        },
-        {
-            id: 3,
-            title: "TOEIC Vocabulary Builder",
-            enrollments: 289,
-            revenue: 57800000,
-            rating: 4.7,
-            completionRate: 82,
-        },
-    ])
+    const navigate = useNavigate()
+    const [stats, setStats] = useState<AdminDashboardStats | null>(null)
+    const [loading, setLoading] = useState(true)
+    const toast = React.useRef<Toast>(null)
 
     // Chart data
     const [revenueChartData, setRevenueChartData] = useState({})
@@ -89,14 +37,66 @@ const AdminDashboard = () => {
         },
     ]
 
+    const calculatePercentageChange = (current: number, lastMonth: number): { value: number; isPositive: boolean } => {
+        if (lastMonth === 0) return { value: 100, isPositive: true }
+        const change = ((current - lastMonth) / lastMonth) * 100
+        return { value: Math.abs(Math.round(change)), isPositive: change >= 0 }
+    }
+
+    const renderMetricChange = (current: number, lastMonth: number) => {
+        const { value, isPositive } = calculatePercentageChange(current, lastMonth)
+        const color = isPositive ? "text-green-500" : "text-red-500"
+        const icon = isPositive ? "pi pi-arrow-up" : "pi pi-arrow-down"
+        
+        return (
+            <div className={`${color} text-sm`}>
+                <i className={`${icon} mr-1`}></i>
+                {value}% from last month
+            </div>
+        )
+    }
+
     useEffect(() => {
+        const fetchDashboardStats = async () => {
+            try {
+                setLoading(true)
+                const response = await callGetDashboardStats()
+                if (response.data) {
+                    setStats(response.data)
+                } else {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to fetch dashboard stats',
+                        life: 3000
+                    })
+                }
+            } catch (err) {
+                console.error('Error fetching dashboard stats:', err)
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'An error occurred while fetching dashboard stats',
+                    life: 3000
+                })
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchDashboardStats()
+    }, [])
+
+    useEffect(() => {
+        if (!stats) return
+
         // Revenue Chart Data
         setRevenueChartData({
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            labels: stats.revenueTrend.labels,
             datasets: [
                 {
                     label: "Revenue (VND)",
-                    data: [6500000, 7200000, 8100000, 7800000, 8900000, 9500000],
+                    data: stats.revenueTrend.data,
                     fill: false,
                     borderColor: "#42A5F5",
                     backgroundColor: "rgba(66, 165, 245, 0.1)",
@@ -107,18 +107,18 @@ const AdminDashboard = () => {
 
         // User Growth Data
         setUserGrowthData({
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            labels: stats.userGrowth.labels,
             datasets: [
                 {
                     label: "New Users",
-                    data: [65, 89, 123, 156, 178, 201],
+                    data: stats.userGrowth.newUsers,
                     backgroundColor: "#66BB6A",
                     borderColor: "#4CAF50",
                     borderWidth: 1,
                 },
                 {
                     label: "Active Users",
-                    data: [145, 167, 189, 234, 267, 289],
+                    data: stats.userGrowth.activeUsers,
                     backgroundColor: "#FFA726",
                     borderColor: "#FF9800",
                     borderWidth: 1,
@@ -128,15 +128,15 @@ const AdminDashboard = () => {
 
         // Test Performance Data
         setTestPerformanceData({
-            labels: ["0-200", "201-400", "401-600", "601-800", "801-990"],
+            labels: stats.testScoreDistribution.labels,
             datasets: [
                 {
-                    data: [12, 25, 35, 20, 8],
+                    data: stats.testScoreDistribution.data,
                     backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
                 },
             ],
         })
-    }, [])
+    }, [stats])
 
     const formatCurrency = (value: number) => {
         return new Intl.NumberFormat("vi-VN", {
@@ -145,30 +145,46 @@ const AdminDashboard = () => {
         }).format(value)
     }
 
-    const ratingTemplate = (rowData: TopCourse) => {
+    const ratingTemplate = (rowData: AdminDashboardStats['topCourses'][0]) => {
         return (
             <div className="flex align-items-center gap-2">
                 <i className="pi pi-star-fill text-yellow-500"></i>
-                <span>{rowData.rating}</span>
+                <span>{rowData.rating.toFixed(1)}</span>
             </div>
         )
     }
 
-    const completionTemplate = (rowData: TopCourse) => {
-        return (
-            <div>
-                <ProgressBar value={rowData.completionRate} className="mb-1" style={{ height: "6px" }} />
-                <small className="text-600">{rowData.completionRate}%</small>
-            </div>
-        )
-    }
-
-    const revenueTemplate = (rowData: TopCourse) => {
+    const revenueTemplate = (rowData: AdminDashboardStats['topCourses'][0]) => {
         return formatCurrency(rowData.revenue)
+    }
+
+    if (loading) {
+        return (
+            <AdminLayout tabName="Dashboard">
+                <div className="flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+                    <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+                </div>
+            </AdminLayout>
+        )
+    }
+
+    if (!stats) {
+        return (
+            <AdminLayout tabName="Dashboard">
+                <div className="flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
+                    <div className="text-center">
+                        <i className="pi pi-exclamation-triangle text-4xl mb-3" style={{ color: '#FF9800' }}></i>
+                        <h2>No Data Available</h2>
+                        <p>There is no dashboard data available at the moment.</p>
+                    </div>
+                </div>
+            </AdminLayout>
+        )
     }
 
     return (
         <AdminLayout tabName="Dashboard">
+            <Toast ref={toast} />
             <BreadCrumb model={itemsBreadCrumb} home={home} />
             <div className="layout-content">
                 {/* Welcome Header */}
@@ -181,8 +197,8 @@ const AdminDashboard = () => {
                                     <p className="text-600 m-0">Here's what's happening with your TOEIC platform today.</p>
                                 </div>
                                 <div className="flex gap-2">
-                                    <Button label="Add Course" icon="pi pi-plus" size="small" />
-                                    <Button label="Create Test" icon="pi pi-file-edit" size="small" outlined />
+                                    <Button label="Add Course" icon="pi pi-plus" size="small" onClick={() => navigate("/admin/course")} />
+                                    <Button label="Create Test" icon="pi pi-file-edit" size="small" outlined onClick={() => navigate("/admin/test/add")} />
                                 </div>
                             </div>
                         </Card>
@@ -203,9 +219,7 @@ const AdminDashboard = () => {
                                 <div className="ml-3">
                                     <div className="text-500 font-medium mb-1">Total Users</div>
                                     <div className="text-900 font-bold text-xl">{stats.totalUsers.toLocaleString()}</div>
-                                    <div className="text-green-500 text-sm">
-                                        <i className="pi pi-arrow-up mr-1"></i>+12% from last month
-                                    </div>
+                                    {renderMetricChange(stats.totalUsers, stats.lastMonthUsers)}
                                 </div>
                             </div>
                         </Card>
@@ -223,9 +237,7 @@ const AdminDashboard = () => {
                                 <div className="ml-3">
                                     <div className="text-500 font-medium mb-1">Monthly Revenue</div>
                                     <div className="text-900 font-bold text-xl">{formatCurrency(stats.monthlyRevenue)}</div>
-                                    <div className="text-green-500 text-sm">
-                                        <i className="pi pi-arrow-up mr-1"></i>+8% from last month
-                                    </div>
+                                    {renderMetricChange(stats.monthlyRevenue, stats.lastMonthRevenue)}
                                 </div>
                             </div>
                         </Card>
@@ -241,11 +253,9 @@ const AdminDashboard = () => {
                                     <i className="pi pi-book text-orange-500 text-xl"></i>
                                 </div>
                                 <div className="ml-3">
-                                    <div className="text-500 font-medium mb-1">Course Enrollments</div>
+                                    <div className="text-500 font-medium mb-1">Course Enrolls</div>
                                     <div className="text-900 font-bold text-xl">{stats.courseEnrollments.toLocaleString()}</div>
-                                    <div className="text-green-500 text-sm">
-                                        <i className="pi pi-arrow-up mr-1"></i>+15% from last month
-                                    </div>
+                                    {renderMetricChange(stats.courseEnrollments, stats.lastMonthCourseEnrollments)}
                                 </div>
                             </div>
                         </Card>
@@ -262,10 +272,8 @@ const AdminDashboard = () => {
                                 </div>
                                 <div className="ml-3">
                                     <div className="text-500 font-medium mb-1">Tests Completed</div>
-                                    <div className="text-900 font-bold text-xl">{stats.completedTests.toLocaleString()}</div>
-                                    <div className="text-green-500 text-sm">
-                                        <i className="pi pi-arrow-up mr-1"></i>+22% from last month
-                                    </div>
+                                    <div className="text-900 font-bold text-xl">{stats.testAttemps.toLocaleString()}</div>
+                                    {renderMetricChange(stats.testAttemps, stats.lastMonthTestAttemps)}
                                 </div>
                             </div>
                         </Card>
@@ -278,7 +286,6 @@ const AdminDashboard = () => {
                         <Card>
                             <div className="flex justify-content-between align-items-center mb-3">
                                 <h3 className="text-xl font-bold">Revenue Trend</h3>
-                                <Button label="View Details" size="small" text />
                             </div>
                             <Chart type="line" data={revenueChartData} height="300px" />
                         </Card>
@@ -316,11 +323,10 @@ const AdminDashboard = () => {
                             <div className="flex justify-content-between align-items-center mb-3">
                                 <h3 className="text-xl font-bold">Top Performing Courses</h3>
                             </div>
-                            <DataTable value={topCourses} size="small">
+                            <DataTable value={stats.topCourses} size="small">
                                 <Column field="title" header="Course" style={{ width: "200px" }} />
                                 <Column field="enrollments" header="Students" />
                                 <Column field="rating" header="Rating" body={ratingTemplate} />
-                                <Column field="completionRate" header="Completion" body={completionTemplate} />
                                 <Column field="revenue" header="Revenue" body={revenueTemplate} />
                             </DataTable>
                         </Card>
