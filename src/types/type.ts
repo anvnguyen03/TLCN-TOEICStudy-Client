@@ -14,6 +14,15 @@ export interface IFetchAccount {
 
 // ------------------ type for DTO got from API response ------------------
 
+export interface AITestAnalysisDTO {
+    overallFeedback: string
+    partAnalysis: string
+    skillAnalysis: string
+    improvementSuggestions: string
+    strengths: string[]
+    weaknesses: string[]
+  }
+
 export interface TestAnalyticsDTO {
     currentScore: number
     previousScore: number
