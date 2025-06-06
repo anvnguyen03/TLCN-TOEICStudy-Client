@@ -3,6 +3,7 @@ import TopBar from "../../components/course/TopBar";
 import CourseContentSidebar from "../../components/course/CourseContentSidebar";
 import CourseBody from "../../components/course/CourseBody";
 import { CourseContext } from "../../context/CourseContext";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 const SIDEBAR_WIDTH = 300;
 const SIDEBAR_COLLAPSED_WIDTH = 0;
@@ -10,11 +11,23 @@ const SIDEBAR_COLLAPSED_WIDTH = 0;
 const CourseLearn: React.FC = () => {
     const context = useContext(CourseContext);
     if (!context) return null;
-    const { isSidebarOpen, setIsSidebarOpen } = context;
+    const { isSidebarOpen, setIsSidebarOpen, loading, error, courseData } = context;
+
+    if (loading) {
+        return <LoadingOverlay visible={true} />;
+    }
+
+    if (error) {
+        return <div className="flex items-center justify-center min-h-screen bg-[#181922] text-white">{error}</div>;
+    }
+
+    if (!courseData) {
+        return <div className="flex items-center justify-center min-h-screen bg-[#181922] text-white">Course data not found</div>;
+    }
 
     return (
         <div className="flex flex-column min-h-screen" style={{ background: '#181922' }}>
-            <TopBar />
+            <TopBar courseTitle={courseData.title} courseId={courseData.id} />
             <div className="flex flex-row flex-1" style={{ minHeight: 'calc(100vh - 4rem)', position: 'relative' }}>
                 {/* Sidebar with smooth transition */}
                 <div

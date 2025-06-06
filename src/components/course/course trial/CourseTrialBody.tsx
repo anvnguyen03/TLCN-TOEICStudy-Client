@@ -6,6 +6,7 @@ import ReactPlayer from 'react-player';
 import 'primeflex/primeflex.css';
 import ReactMarkdown from 'react-markdown';
 import { callCheckMultipleChoiceAnswers, callCheckCardMatchingAnswers } from '../../../services/QuizTrialService';
+import { TrialMultipleChoiceResult } from '../../../types/type';
 
 interface QuizQuestion {
   id: number;
@@ -25,14 +26,26 @@ interface QuizLessonProps {
   lessonId: number;
 }
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const arr = [...array]
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+  }
+  return arr
+}
+
 const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(quiz.questions.length).fill(null));
   const [score, setScore] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [quizResults, setQuizResults] = useState<TrialMultipleChoiceResult | null>(null);
 
   // Card-matching state
+  const [promptOrder, setPromptOrder] = useState<number[]>([]);
+  const [answerOrder, setAnswerOrder] = useState<number[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<number | null>(null);
   const [matches, setMatches] = useState<(number | null)[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -63,12 +76,16 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
   React.useEffect(() => {
     const q = quiz.questions[current];
     if (q.type === 'card-matching' && q.pairs) {
+      // Shuffle both prompts and answers independently
+      const shuffledPrompts = shuffleArray(q.pairs.map((_, i) => i));
+      const shuffledAnswers = shuffleArray(q.pairs.map((_, i) => i));
+      setPromptOrder(shuffledPrompts);
+      setAnswerOrder(shuffledAnswers);
       setMatches(Array(q.pairs.length).fill(null));
       setSelectedPrompt(null);
       setSubmitted(false);
       setResult([]);
     }
-    // eslint-disable-next-line
   }, [current, quiz.questions]);
 
   const handleSelect = (idx: number) => {
@@ -85,6 +102,7 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
   const handleAnswerClick = (aIdx: number) => {
     if (submitted || selectedPrompt === null) return;
     if (matches.includes(aIdx)) return;
+    
     const updated = [...matches];
     updated[selectedPrompt] = aIdx;
     setMatches(updated);
@@ -123,16 +141,24 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
         const result = response.data;
         
         setScore(result?.correctAnswers || 0);
+        setQuizResults(result || null);
         setShowResult(true);
         if (onComplete) onComplete(result?.correctAnswers === result?.totalQuestions);
       } else {
-        // Prepare card matching answer
+        // Prepare card matching answer with correct prompt-answer pairs
+        const q = quiz.questions[current];
+        if (!q.pairs) return;
+
         const cardMatchingAnswer = {
-          quizQuestionId: quiz.questions[current].id,
-          pairs: quiz.questions[current].pairs?.map(pair => ({
-            promptId: pair.prompt.id,
-            answerContent: pair.answer
-          })) || []
+          quizQuestionId: q.id,
+          pairs: matches.map((matchIdx, promptIdx) => {
+            const originalPromptIdx = promptOrder[promptIdx];
+            const originalAnswerIdx = matchIdx !== null ? answerOrder[matchIdx] : -1;
+            return {
+              promptId: q.pairs![originalPromptIdx].prompt.id,
+              answerContent: matchIdx !== null ? q.pairs![originalAnswerIdx].answer : ''
+            };
+          })
         };
 
         const response = await callCheckCardMatchingAnswers(cardMatchingAnswer);
@@ -145,7 +171,6 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
       }
     } catch (error) {
       console.error('Error submitting quiz:', error);
-      // Handle error appropriately
     } finally {
       setIsSubmitting(false);
     }
@@ -157,9 +182,13 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
       setShowResult(false);
       setCurrent(0);
     } else {
-      // Reset only the current card matching question
       const q = quiz.questions[current];
       if (q.type === 'card-matching' && q.pairs) {
+        // Re-shuffle prompts and answers
+        const shuffledPrompts = shuffleArray(q.pairs.map((_, i) => i));
+        const shuffledAnswers = shuffleArray(q.pairs.map((_, i) => i));
+        setPromptOrder(shuffledPrompts);
+        setAnswerOrder(shuffledAnswers);
         setMatches(Array(q.pairs.length).fill(null));
         setSelectedPrompt(null);
         setSubmitted(false);
@@ -169,7 +198,7 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
     if (onComplete) onComplete(false);
   };
 
-  if (showResult && quiz.questions[current].type === 'multiple-choice') {
+  if (showResult && quiz.questions[current].type === 'multiple-choice' && quizResults) {
     return (
       <div className="p-4" style={{ background: '#fff', borderRadius: '1rem', maxWidth: 700, margin: '0 auto' }}>
         <div className="mb-3" style={{ color: '#23243a', fontWeight: 600, fontSize: '1.2rem' }}>Quiz Results</div>
@@ -177,23 +206,31 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
           You got {score} / {quiz.questions.length} correct!
         </div>
         <ul className="list-none p-0 m-0 mb-4">
-          {quiz.questions.map((q, i) => (
-            <li key={i} className="mb-3">
-              <div style={{ color: '#23243a', fontWeight: 600 }}>{i + 1}. {q.question}</div>
-              <div>
-                {q.options.map((opt, idx) => (
-                  <div key={idx} style={{
-                    color: idx === q.answer ? '#22c55e' : (answers[i] === idx && answers[i] !== q.answer ? '#ef4444' : '#23243a'),
-                    fontWeight: idx === q.answer ? 700 : 400,
-                    marginLeft: 8
-                  }}>
-                    {idx === q.answer ? '✔ ' : ''}{opt}
-                    {answers[i] === idx && answers[i] !== q.answer ? ' (Your answer)' : ''}
-                  </div>
-                ))}
-              </div>
-            </li>
-          ))}
+          {quiz.questions.map((q, i) => {
+            const result = quizResults.results.find((r: { quizQuestionId: number }) => r.quizQuestionId === q.id);
+            return (
+              <li key={i} className="mb-3">
+                <div style={{ color: '#23243a', fontWeight: 600 }}>{i + 1}. {q.question}</div>
+                <div>
+                  {q.options.map((opt, idx) => {
+                    const isCorrect = result?.correctOption === opt;
+                    const isSelected = result?.selectedOption === opt;
+                    const isWrong = isSelected && !isCorrect;
+                    return (
+                      <div key={idx} style={{
+                        color: isCorrect ? '#22c55e' : (isWrong ? '#ef4444' : '#23243a'),
+                        fontWeight: isCorrect ? 700 : 400,
+                        marginLeft: 8
+                      }}>
+                        {isCorrect ? '✔ ' : ''}{opt}
+                        {isWrong ? ' (Your answer)' : ''}
+                      </div>
+                    );
+                  })}
+                </div>
+              </li>
+            );
+          })}
         </ul>
         <Button label="Retry Quiz" onClick={handleRetry} className="p-button-sm mr-2" style={{ background: '#a78bfa', border: 'none', fontWeight: 700 }} />
       </div>
@@ -241,40 +278,51 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
       <div className="grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
         <div>
           <div className="mb-2" style={{ fontWeight: 700, color: '#6d28d2' }}>Prompts</div>
-          {quiz.questions[current].pairs?.map((pair, i) => (
+          {promptOrder.map((pIdx, i) => (
             <div
-              key={i}
+              key={pIdx}
               className={`p-3 border-1 border-round mb-2 cursor-pointer ${selectedPrompt === i ? 'border-primary' : 'border-gray-300'} ${matches[i] !== null ? 'bg-gray-200' : ''}`}
-              style={{ borderColor: selectedPrompt === i ? '#a78bfa' : '#d1d5db', background: matches[i] !== null ? '#f6f3ff' : '#fff', minHeight: 60, opacity: submitted && !result[i] ? 0.6 : 1 }}
+              style={{ 
+                borderColor: selectedPrompt === i ? '#a78bfa' : '#d1d5db', 
+                background: matches[i] !== null ? '#f6f3ff' : '#fff', 
+                minHeight: 60, 
+                opacity: submitted && !result[i] ? 0.6 : 1 
+              }}
               onClick={() => handlePromptClick(i)}
             >
-              {pair.prompt.content}
+              {q.pairs![pIdx].prompt.content}
               {matches[i] !== null && (
                 <span className="ml-2 text-xs" style={{ color: '#a78bfa' }}>
-                  → {pair.answer}
+                  → {q.pairs![answerOrder[matches[i]!]].answer}
                 </span>
               )}
               {submitted && result[i] !== undefined && (
-                <span className="ml-2" style={{ fontWeight: 700, color: result[i] ? '#22c55e' : '#ef4444' }}>{result[i] ? '✔' : '✗'}</span>
+                <span className="ml-2" style={{ fontWeight: 700, color: result[i] ? '#22c55e' : '#ef4444' }}>
+                  {result[i] ? '✔' : '✗'}
+                </span>
               )}
             </div>
           ))}
         </div>
         <div>
           <div className="mb-2" style={{ fontWeight: 700, color: '#6d28d2' }}>Answers</div>
-          {quiz.questions[current].pairs?.map((pair, i) => {
+          {answerOrder.map((aIdx, i) => {
             const matchedPrompt = matches.findIndex(m => m === i);
             return (
               <div
-                key={i}
+                key={aIdx}
                 className={`p-3 border-1 border-round mb-2 cursor-pointer ${matchedPrompt !== -1 ? 'bg-gray-200' : ''}`}
-                style={{ background: matchedPrompt !== -1 ? '#f6f3ff' : '#fff', minHeight: 60, opacity: submitted && matchedPrompt === -1 ? 0.6 : 1 }}
+                style={{ 
+                  background: matchedPrompt !== -1 ? '#f6f3ff' : '#fff', 
+                  minHeight: 60, 
+                  opacity: submitted && matchedPrompt === -1 ? 0.6 : 1 
+                }}
                 onClick={() => handleAnswerClick(i)}
               >
-                {pair.answer}
+                {q.pairs![aIdx].answer}
                 {matchedPrompt !== -1 && (
                   <span className="ml-2 text-xs" style={{ color: '#a78bfa' }}>
-                    ← {quiz.questions[current].pairs![matchedPrompt].prompt.content.slice(0, 12)}...
+                    ← {q.pairs![promptOrder[matchedPrompt]].prompt.content.slice(0, 12)}...
                   </span>
                 )}
               </div>
@@ -283,9 +331,19 @@ const QuizLesson = ({ quiz, onComplete, lessonId }: QuizLessonProps) => {
         </div>
       </div>
       <div className="flex align-items-center gap-3 mt-4">
-        <Button label="Submit" onClick={handleSubmit} disabled={matches.some(m => m === null) || submitted} style={{ background: '#a78bfa', border: 'none', fontWeight: 700 }} />
+        <Button 
+          label="Submit" 
+          onClick={handleSubmit} 
+          disabled={matches.some(m => m === null) || submitted} 
+          style={{ background: '#a78bfa', border: 'none', fontWeight: 700 }} 
+        />
         {submitted && !result.every(Boolean) && (
-          <Button label="Retry" onClick={handleRetry} className="p-button-sm" style={{ background: '#a78bfa', border: 'none', fontWeight: 700 }} />
+          <Button 
+            label="Retry" 
+            onClick={handleRetry} 
+            className="p-button-sm" 
+            style={{ background: '#a78bfa', border: 'none', fontWeight: 700 }} 
+          />
         )}
         {submitted && result.every(Boolean) && (
           <span style={{ fontWeight: 600, color: '#22c55e' }}>All correct! Well done!</span>

@@ -14,6 +14,43 @@ export interface IFetchAccount {
 
 // ------------------ type for DTO got from API response ------------------
 
+export interface CourseDetailResponse {
+    id: number;
+    title: string;
+    rating: number;
+    totalReviews: number;
+    students: number;
+    objective: string;
+    description: string;
+    previewVideoUrl: string;
+    thumbnailUrl: string;
+    price: number;
+    duration: number;
+    totalSections: number;
+    totalLessons: number;
+    totalCompletedLessons: number;
+    sections: {
+        id: number;
+        title: string;
+        orderIndex: number;
+        totalLessons: number;
+        duration: number;
+        lessons: {
+            id: number;
+            title: string;
+            description: string | null;
+            type: 'VIDEO' | 'TEXT' | 'QUIZ';
+            duration: number;
+            orderIndex: number;
+            isFree: boolean;
+            isCompleted: boolean;
+            content: string | null;
+            videoUrl: string | null;
+            quizQuestions: QuizQuestion[];
+        }[];
+    }[];
+}
+
 export interface QuizQuestion {
     id: number;
     type: 'MULTIPLE_CHOICE' | 'CARD_MATCHING';
@@ -359,6 +396,47 @@ export interface TrialCardMatchingResult {
     correct: boolean;
   }[];
 }
+
+// Enrolled Course Quiz Types
+export interface EnrolledMultipleChoiceAnswerRequest {
+  quizQuestionId: number;
+  selectedOption: string;
+}
+
+export interface EnrolledCardMatchingAnswerRequest {
+  quizQuestionId: number;
+  pairs: {
+    promptId: number;
+    answerContent: string;
+  }[];
+}
+
+export interface EnrolledMultipleChoiceResult {
+  totalQuestions: number;
+  correctAnswers: number;
+  lessonId: number;
+  isCompleted: boolean;
+  results: {
+    quizQuestionId: number;
+    correctOption: string;
+    selectedOption: string;
+    correct: boolean;
+  }[];
+}
+
+export interface EnrolledCardMatchingResult {
+  totalPairs: number;
+  correctPairs: number;
+  lessonId: number;
+  isCompleted: boolean;
+  results: {
+    promptId: number;
+    selectedAnswer: string;
+    correctAnswer: string;
+    correct: boolean;
+  }[];
+}
+
 export interface UpdateUserRequest {
     userId: number
     fullname: string

@@ -31,6 +31,7 @@ import CourseInfo from './pages/courses/CourseInfo'
 import { ProtectedAdminRoute, ProtectedUserRoute, PublicRoute } from './components/ProtectedRoute'
 import CourseLearnWrapper from './components/course/CourseLearnWrapper'
 import CourseTrialWrapper from './components/course/course trial/CourseTrialWrapper'
+import LoadingOverlay from './components/LoadingOverlay'
 
 function App() {
 
@@ -45,7 +46,7 @@ function App() {
   }, [dispatch])
 
   if (loading) {
-    return (<h1 className='text-center'>Loading...</h1>)
+    return (<LoadingOverlay visible={true} />)
   }
 
   return (
