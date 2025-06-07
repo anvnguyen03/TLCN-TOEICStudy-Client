@@ -28,6 +28,8 @@ import ResetPassword from './pages/forgot-password/ResetPassword'
 import Profile from './pages/profile/Profile'
 import Courses from './pages/courses/courses'
 import CourseInfo from './pages/courses/CourseInfo'
+import PaymentSuccess from './pages/courses/PaymentSuccess'
+import PaymentFailed from './pages/courses/PaymentFailed'
 import { ProtectedAdminRoute, ProtectedUserRoute, PublicRoute } from './components/ProtectedRoute'
 import CourseLearnWrapper from './components/course/CourseLearnWrapper'
 import CourseTrialWrapper from './components/course/course trial/CourseTrialWrapper'
@@ -67,6 +69,8 @@ function App() {
         <Route path="/courses" element={<PublicRoute><Courses /></PublicRoute>} />
         <Route path="/courses/:id" element={<PublicRoute><CourseInfo /></PublicRoute>} />
         <Route path="/courses/:id/trial" element={<PublicRoute><CourseTrialWrapper /></PublicRoute>} />
+        <Route path="/payment-success" element={<PublicRoute><PaymentSuccess /></PublicRoute>} />
+        <Route path="/payment-failed" element={<PublicRoute><PaymentFailed /></PublicRoute>} />
 
         {/* Protected Routes for User */}
         <Route path="/profile" element={<ProtectedUserRoute><Profile /></ProtectedUserRoute>} />

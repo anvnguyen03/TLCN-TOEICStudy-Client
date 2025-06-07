@@ -127,10 +127,11 @@ const QuizLesson = ({ quiz, onComplete, lessonId, userId }: QuizLessonProps) => 
         setShowResult(true);
         
         // Immediately update lesson completion state if quiz is passed
-        if (result?.isCompleted && context?.markLessonCompleted) {
+        if (result?.completed && context?.markLessonCompleted) {
+          console.log("marking lesson as completed");
           context.markLessonCompleted(lessonId);
         }
-        if (onComplete) onComplete(result?.isCompleted || false);
+        if (onComplete) onComplete(result?.completed || false);
       } else {
         // Prepare card matching answer with correct prompt-answer pairs
         const q = quiz.questions[current];
@@ -155,10 +156,17 @@ const QuizLesson = ({ quiz, onComplete, lessonId, userId }: QuizLessonProps) => 
         setResult(results);
         setSubmitted(true);
 
-        if (result?.isCompleted && context?.markLessonCompleted) {
-          context.markLessonCompleted(lessonId);
+        // Add a delay before marking lesson as completed and resetting
+        if (result?.completed) {
+          setTimeout(() => {
+            if (context?.markLessonCompleted) {
+              context.markLessonCompleted(lessonId);
+            }
+            if (onComplete) onComplete(true);
+          }, 3000); // Wait 3 seconds to show the result
+        } else {
+          if (onComplete) onComplete(false);
         }
-        if (onComplete) onComplete(result?.isCompleted || false);
       }
     } catch (error) {
       console.error('Error submitting quiz:', error);
@@ -361,7 +369,7 @@ const CourseBody: React.FC = () => {
 
   if (!context) return null;
 
-  const { currentLesson, setCurrentLesson, sections, markLessonCompleted, isLessonCompleted } = context;
+  const { currentLesson, setCurrentLesson, sections, markLessonCompleted, unmarkLessonCompleted, isLessonCompleted } = context;
   const { sectionIndex, lessonIndex } = currentLesson;
   const section = sections[sectionIndex];
   const lesson = section.lessons[lessonIndex];
@@ -381,9 +389,6 @@ const CourseBody: React.FC = () => {
   };
 
   const goToNextLesson = () => {
-    if (!isLessonCompleted(lesson.id) && lesson.type !== 'QUIZ') {
-      markLessonCompleted(lesson.id);
-    }
     if (lessonIndex < section.lessons.length - 1) {
       // Force remount of quiz component
       setQuizKey(prev => prev + 1);
@@ -437,11 +442,49 @@ const CourseBody: React.FC = () => {
               controls
               width="100%"
             />
+            <div className="p-4 flex justify-content-end">
+              {!isLessonCompleted(lesson.id) ? (
+                <Button 
+                  label="Mark as completed" 
+                  icon="pi pi-check" 
+                  className="p-button-success"
+                  onClick={() => markLessonCompleted(lesson.id)}
+                />
+              ) : (
+                <Button 
+                  label="Unmark as completed" 
+                  icon="pi pi-times" 
+                  className="p-button-danger"
+                  onClick={() => unmarkLessonCompleted(lesson.id)}
+                />
+              )}
+            </div>
           </div>
         }
-        {lesson.type === 'TEXT' && <div className="p-4 text-base" style={{ color: '#000', background: '#fff' }}>
-          <ReactMarkdown>{lesson.content}</ReactMarkdown>
-        </div>}
+        {lesson.type === 'TEXT' && (
+          <div>
+            <div className="p-4 text-base" style={{ color: '#000', background: '#fff' }}>
+              <ReactMarkdown>{lesson.content}</ReactMarkdown>
+            </div>
+            <div className="p-4 flex justify-content-end">
+              {!isLessonCompleted(lesson.id) ? (
+                <Button 
+                  label="Mark as completed" 
+                  icon="pi pi-check" 
+                  className="p-button-success"
+                  onClick={() => markLessonCompleted(lesson.id)}
+                />
+              ) : (
+                <Button 
+                  label="Unmark as completed" 
+                  icon="pi pi-times" 
+                  className="p-button-danger"
+                  onClick={() => unmarkLessonCompleted(lesson.id)}
+                />
+              )}
+            </div>
+          </div>
+        )}
         {lesson.type === 'QUIZ' && lesson.quizQuestions && (
           <div key={quizKey}>
             <QuizLesson

@@ -92,12 +92,12 @@ const CourseInfo = () => {
                     if (!course) return;
                     const response = await callCreateVNPayPayment(userId!, course.id, course.price);
                     if (response.status === 'OK' && response.data) {
-                        toast.current?.show({
-                            severity: 'success',
-                            summary: 'Thành công',
-                            detail: 'Đăng ký khóa học thành công!',
-                            sticky: true,
-                        });
+                        // toast.current?.show({
+                        //     severity: 'success',
+                        //     summary: 'Thành công',
+                        //     detail: 'Đăng ký khóa học thành công!',
+                        //     sticky: true,
+                        // });
                         window.open(response.data, '_blank');
                     } else {
                         toast.current?.show({

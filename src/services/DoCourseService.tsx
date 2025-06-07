@@ -10,9 +10,16 @@ export const callGetCompleteCourseDetail = async (courseId: number, userId: numb
     return response.data;
 };
 
-export const callMarkLessonCompleted = async (courseId: number, lessonId: number, userId: number): Promise<ApiResponse<void>> => {
-    const response = await apiClient.post<ApiResponse<void>>(`${baseURL}/${courseId}/lessons/${lessonId}/complete`, null, {
-        params: { userId }
+export const callMarkLessonCompleted = async (lessonId: number, userId: number): Promise<ApiResponse<void>> => {
+    const response = await apiClient.post<ApiResponse<void>>(`${baseURL}/enrolled/mark-lesson-as-completed`, null, {
+        params: { userId, lessonId }
+    });
+    return response.data;
+};
+
+export const callUnmarkLessonCompleted = async (lessonId: number, userId: number): Promise<ApiResponse<void>> => {
+    const response = await apiClient.post<ApiResponse<void>>(`${baseURL}/enrolled/unmark-lesson-as-completed`, null, {
+        params: { userId, lessonId }
     });
     return response.data;
 };

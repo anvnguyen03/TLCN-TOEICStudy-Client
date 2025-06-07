@@ -1,5 +1,5 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { callGetCompleteCourseDetail, callMarkLessonCompleted } from '../services/DoCourseService';
+import { callGetCompleteCourseDetail, callMarkLessonCompleted, callUnmarkLessonCompleted } from '../services/DoCourseService';
 import { CourseDetailResponse } from '../types/type';
 
 interface CurrentLessonPointer {
@@ -15,6 +15,7 @@ interface CourseContextType {
   setIsSidebarOpen: (open: boolean) => void;
   completedLessons: { [lessonId: number]: boolean };
   markLessonCompleted: (lessonId: number) => void;
+  unmarkLessonCompleted: (lessonId: number) => void;
   isLessonCompleted: (lessonId: number) => boolean;
   courseData: CourseDetailResponse | null;
   loading: boolean;
@@ -70,14 +71,27 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children, course
 
   const markLessonCompleted = async (lessonId: number) => {
     try {
-      const response = await callMarkLessonCompleted(courseId, lessonId, userId);
-      if (response.status === "OK") {
-        setCompletedLessons((prev) => ({ ...prev, [lessonId]: true }));
-      } else {
-        console.error("Failed to mark lesson as completed:", response.message);
-      }
+        const response = await callMarkLessonCompleted(lessonId, userId);
+        if (response.status === "OK") {
+            setCompletedLessons((prev) => ({ ...prev, [lessonId]: true }));
+        }
     } catch (err) {
       console.error("Error marking lesson as completed:", err);
+    }
+  };
+
+  const unmarkLessonCompleted = async (lessonId: number) => {
+    try {
+        const response = await callUnmarkLessonCompleted(lessonId, userId);
+        if (response.status === "OK") {
+            setCompletedLessons((prev) => {
+                const newState = { ...prev };
+                delete newState[lessonId];
+                return newState;
+            });
+        }
+    } catch (err) {
+      console.error("Error unmarking lesson as completed:", err);
     }
   };
 
@@ -93,6 +107,7 @@ export const CourseProvider: React.FC<CourseProviderProps> = ({ children, course
         setIsSidebarOpen,
         completedLessons,
         markLessonCompleted,
+        unmarkLessonCompleted,
         isLessonCompleted,
         courseData,
         loading,

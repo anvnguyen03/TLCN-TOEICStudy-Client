@@ -415,7 +415,7 @@ export interface EnrolledMultipleChoiceResult {
   totalQuestions: number;
   correctAnswers: number;
   lessonId: number;
-  isCompleted: boolean;
+  completed: boolean;
   results: {
     quizQuestionId: number;
     correctOption: string;
@@ -428,7 +428,7 @@ export interface EnrolledCardMatchingResult {
   totalPairs: number;
   correctPairs: number;
   lessonId: number;
-  isCompleted: boolean;
+  completed: boolean;
   results: {
     promptId: number;
     selectedAnswer: string;
