@@ -361,6 +361,7 @@ const CourseBody: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [quizKey, setQuizKey] = useState(0);
   const userId = useAppSelector(state => state.auth.userId);
+  const token = localStorage.getItem('token')
 
   // Reset quiz state when lesson changes
   useEffect(() => {
@@ -373,7 +374,7 @@ const CourseBody: React.FC = () => {
   const { sectionIndex, lessonIndex } = currentLesson;
   const section = sections[sectionIndex];
   const lesson = section.lessons[lessonIndex];
-
+  const videoUrl = `http://localhost:8080/api/v1/video-serve/stream/${context.courseData?.id}/${lesson.id}/${lesson.videoUrl}?token=${token}`;
   // Navigation logic
   const goToPreviousLesson = () => {
     if (lessonIndex > 0) {
@@ -438,7 +439,7 @@ const CourseBody: React.FC = () => {
         {lesson.type === 'VIDEO' && lesson.videoUrl &&
           <div className="p-mb-4">
             <ReactPlayer
-              url={lesson.videoUrl}
+              url={videoUrl}
               controls
               width="100%"
             />
