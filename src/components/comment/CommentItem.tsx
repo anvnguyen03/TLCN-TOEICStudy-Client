@@ -24,9 +24,7 @@ const CommentsItem = ({ loadingState, userId, comment, parent, handleAddComment,
         <div className={`p-2 pl-3 pr-0`}>
             {/* {isChildButNotLastOnLevel() && <div className="absolute bg-gray-300" style={{ width: '2px', height: '100%',  }}></div>} */}
             <div className="relative">
-                {comment.parentId != 0 && (
-                    <div className="absolute border-bottom-2 border-left-2 border-gray-300" style={{ left: '-25px', top: '-10px', width: '25px', height: '33px' }}></div>
-                )}
+          
                 <div className="flex gap-2 align-items-center">
                     <Avatar icon="pi pi-user" size="normal" style={{ backgroundColor: '#2196F3', color: '#ffffff' }} shape="circle" />
                     <div className='flex flex-column gap-1'>
@@ -35,8 +33,6 @@ const CommentsItem = ({ loadingState, userId, comment, parent, handleAddComment,
                     </div>
                 </div>
                 
-                {comment.children.length > 0 && <div className="absolute bg-gray-300" style={{ width: '2px', height: 'calc(100% - 38px)', left: '15px' }}></div>}
-                {/* ${comment.children.length > 0 ? 'border-left-2 border-300' : 'border-none'} */}
                 <div className={`ml-3 `}>
 
                     <div className='ml-3 mt-2' style={{ backgroundColor: "#f1f3f5", padding: "10px", borderRadius: "8px", width: 'fit-content' }}>

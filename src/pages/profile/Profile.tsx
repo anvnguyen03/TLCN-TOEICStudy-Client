@@ -183,34 +183,74 @@ const Profile: React.FC = () => {
                     </div>
                 </p>
             </Dialog>
-            <h2 className="font-bold text-center text-primary p-5">Thông tin cá nhân</h2>
-            <div className="flex w-full justify-content-center">
-                <div className="contentblock w-6 ">
-                    <div className="flex gap-2">
-                        <b>Tài khoản: </b>
-                        <div className="text-green-400 font-semibold">{auth.role}</div>
+            <div style={{
+                minHeight: '100vh',
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                padding: '40px 0'
+            }}>
+                <div style={{
+                    position: 'relative',
+                    background: '#fff',
+                    borderRadius: '32px',
+                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+                    width: '100%',
+                    maxWidth: 480,
+                    padding: '56px 32px 32px 32px',
+                    textAlign: 'center',
+                    marginTop: 60
+                }}>
+                    <div style={{
+                        position: 'absolute',
+                        top: -60,
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: 120,
+                        height: 120,
+                        borderRadius: '50%',
+                        boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)',
+                        background: '#fff',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        border: '6px solid #fff',
+                        zIndex: 2
+                    }}>
+                        <i className="pi pi-user" style={{ fontSize: 64, color: '#4facfe' }} />
                     </div>
-
-                    <div className="flex flex-column gap-2 my-4">
-                        <div className="p-inputgroup flex-1">
-                            <span className="p-inputgroup-addon">
-                                <i className="pi pi-envelope"></i>
-                            </span>
-                            <InputText placeholder="Email" disabled value={auth.email} />
-                        </div>
-                        <div className="p-inputgroup flex-1">
-                            <span className="p-inputgroup-addon">
-                                <i className="pi pi-user"></i>
-                            </span>
-                            <InputText placeholder="Username" value={fullname} onChange={(e) => setFullname(e.target.value)} />
-                        </div>
+                    <h2 style={{ fontWeight: 700, marginTop: 70, marginBottom: 8 }}>{fullname || 'Chưa đặt tên'}</h2>
+                    <div style={{ color: '#888', fontSize: 16, marginBottom: 8 }}>{auth.email}</div>
+                    <div style={{ color: '#aaa', fontSize: 15, marginBottom: 24 }}>{auth.role}</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 24 }}>
+                        <Button label="Đổi mật khẩu" icon="pi pi-key" text rounded severity="help" loading={loading} onClick={() => setVisible(true)} style={{ fontWeight: 600 }} />
+                        <Button label="Cập nhật tên" icon="pi pi-save" text rounded severity="info" loading={loading} onClick={handleUpdateInfo} style={{ fontWeight: 600 }} />
                     </div>
-
-                    <div className="flex justify-content-between">
-                        <Button label="Đổi mật khẩu" text rounded severity="help" loading={loading} onClick={() => setVisible(true)} />
-                        <Button label="Cập nhật" text rounded severity="info" loading={loading} onClick={handleUpdateInfo} />
+                    <div style={{ marginBottom: 24 }}>
+                        <InputText placeholder="Tên hiển thị" value={fullname} onChange={(e) => setFullname(e.target.value)} style={{ width: '100%', maxWidth: 320, textAlign: 'center' }} />
                     </div>
-
+                    <button style={{
+                        background: 'linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 24,
+                        padding: '12px 36px',
+                        fontWeight: 600,
+                        fontSize: 18,
+                        boxShadow: '0 2px 8px 0 rgba(79,172,254,0.10)',
+                        cursor: 'pointer',
+                        marginTop: 8,
+                        transition: 'filter 0.2s',
+                    }}
+                        onClick={() => toast.current?.show({ severity: 'info', detail: 'Chức năng sắp ra mắt!' })}
+                        onMouseOver={e => (e.currentTarget.style.filter = 'brightness(0.95)')}
+                        onMouseOut={e => (e.currentTarget.style.filter = 'none')}
+                    >
+                        Show more
+                    </button>
                 </div>
             </div>
         </UserLayout>

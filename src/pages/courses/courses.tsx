@@ -89,7 +89,7 @@ const Courses: React.FC = () => {
                                             Start Course
                                         </Button>
                                         <div className="flex align-items-center mt-2">
-                                            <span className="text-yellow-500 text-lg font-bold">{course.rating}</span>
+                                            <span className="text-yellow-500 text-lg font-bold">{Math.round(course.rating * 10) / 10}</span>
                                             <i className="fas fa-star text-yellow-500 ml-1"></i>
                                         </div>
                                     </div>

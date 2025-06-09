@@ -32,6 +32,11 @@ const AvatarHeader: React.FC = () => {
                     url: '/test-history'
                 },
                 {
+                    label: 'My learning',
+                    icon: 'pi pi-book',
+                    url: '/my-learning'
+                },
+                {
                     label: 'Log out',
                     icon: 'pi pi-sign-out',
                     command: handleLogout

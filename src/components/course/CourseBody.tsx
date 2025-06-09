@@ -7,7 +7,8 @@ import ReactPlayer from 'react-player';
 import ReactMarkdown from 'react-markdown';
 import { callCheckEnrolledMultipleChoiceAnswers, callCheckEnrolledCardMatchingAnswers } from '../../services/QuizLearnService';
 import { useAppSelector } from '../../hooks/reduxHooks';
-import { EnrolledMultipleChoiceResult } from '../../types/type';
+import { EnrolledMultipleChoiceResult, CourseReviewDTO, ReviewStatistics } from '../../types/type';
+import { callGetReviewStatistics, callGetCourseReviewPagination } from '../../services/CourseReviewService';
 
 interface QuizQuestion {
   id: number;
@@ -361,7 +362,73 @@ const CourseBody: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [quizKey, setQuizKey] = useState(0);
   const userId = useAppSelector(state => state.auth.userId);
-  const token = localStorage.getItem('token')
+  const token = localStorage.getItem('token');
+
+  // Review states
+  const [reviews, setReviews] = useState<CourseReviewDTO[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStatistics | null>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+
+  // Fetch review statistics
+  useEffect(() => {
+    const fetchReviewStats = async () => {
+      if (context?.courseData?.id) {
+        try {
+          const response = await callGetReviewStatistics(context.courseData.id);
+          if (response.status === "OK" && response.data) {
+            setReviewStats(response.data);
+          }
+        } catch (error) {
+          console.error('Error fetching review statistics:', error);
+        }
+      }
+    };
+
+    fetchReviewStats();
+  }, [context?.courseData?.id]);
+
+  // Fetch initial reviews
+  useEffect(() => {
+    const fetchInitialReviews = async () => {
+      if (context?.courseData?.id) {
+        try {
+          setLoadingReviews(true);
+          const response = await callGetCourseReviewPagination(context.courseData.id, 0, 2);
+          if (response.status === "OK" && response.data?.reviews) {
+            setReviews(response.data.reviews);
+            setTotalPages(response.data.totalPages);
+          }
+        } catch (error) {
+          console.error('Error fetching reviews:', error);
+        } finally {
+          setLoadingReviews(false);
+        }
+      }
+    };
+
+    fetchInitialReviews();
+  }, [context?.courseData?.id]);
+
+  // Load more reviews
+  const handleLoadMore = async () => {
+    if (context?.courseData?.id && currentPage < totalPages - 1) {
+      try {
+        setLoadingReviews(true);
+        const nextPage = currentPage + 1;
+        const response = await callGetCourseReviewPagination(context.courseData.id, nextPage, 2);
+        if (response.status === "OK" && response.data?.reviews) {
+          setReviews(prev => [...prev, ...response.data.reviews]);
+          setCurrentPage(nextPage);
+        }
+      } catch (error) {
+        console.error('Error loading more reviews:', error);
+      } finally {
+        setLoadingReviews(false);
+      }
+    }
+  };
 
   // Reset quiz state when lesson changes
   useEffect(() => {
@@ -512,7 +579,7 @@ const CourseBody: React.FC = () => {
 
       {/* Tabs for Overview, Notes, Reviews */}
       <TabView className="custom-tabview" style={{ background: 'transparent' }}>
-      <TabPanel header="Overview">
+        <TabPanel header="Overview">
           <div style={{ color: '#23243a', background: 'transparent', padding: '0 0 2rem 0' }}>
             {/* Course Title & Stats */}
             <h2 style={{ fontWeight: 700, fontSize: '2rem', marginBottom: 8 }}>{context.courseData?.title}</h2>
@@ -580,66 +647,86 @@ const CourseBody: React.FC = () => {
           <div style={{ color: '#23243a', background: 'transparent', padding: '0 0 2rem 0' }}>
             {/* Student Feedback Summary */}
             <h2 style={{ fontWeight: 700, fontSize: '1.5rem', marginBottom: 16 }}>Student feedback</h2>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 32, marginBottom: 32, width: '100%' }}>
-              {/* Average Rating */}
-              <div style={{ minWidth: 120, maxWidth: 140, flex: '0 0 140px', textAlign: 'center', paddingRight: 16 }}>
-                <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#b4690e', lineHeight: 1 }}>{4.5}</div>
-                <div style={{ color: '#b4690e', fontSize: '1.2rem', marginBottom: 4, letterSpacing: 2 }}>
-                  {'★'.repeat(4)}<span style={{ opacity: 0.5 }}>★</span>
-                </div>
-                <div style={{ color: '#888', fontSize: '0.95rem' }}>Tutorial rating</div>
-              </div>
-              {/* Rating Breakdown */}
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
-                {[5, 4, 3, 2, 1].map((star, i) => (
-                  <div key={star} style={{ display: 'grid', gridTemplateColumns: '220px 90px 50px', alignItems: 'center', gap: 0, marginBottom: 2 }}>
-                    <div style={{ height: 10, background: '#e5e7eb', borderRadius: 4, overflow: 'hidden', width: '100%', marginRight: 0 }}>
-                      <div style={{ width: `${[55, 32, 10, 2, 1][i]}%`, height: '100%', background: '#b4690e' }}></div>
-                    </div>
-                    <span style={{ color: '#b4690e', fontSize: '1.1rem', letterSpacing: 1, display: 'inline-block', textAlign: 'left', paddingLeft: 16, marginRight: 16 }}>{'★'.repeat(star)}</span>
-                    <span style={{ color: '#5624d0', fontSize: '0.95rem', cursor: 'pointer', display: 'inline-block', paddingLeft: '2rem' }}>{[55, 32, 10, 2, 1][i]}%</span>
+            {reviewStats && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 32, marginBottom: 32, width: '100%' }}>
+                {/* Average Rating */}
+                <div style={{ minWidth: 120, maxWidth: 140, flex: '0 0 140px', textAlign: 'center', paddingRight: 16 }}>
+                  <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#b4690e', lineHeight: 1 }}>
+                    {reviewStats.averageRating.toFixed(1)}
                   </div>
-                ))}
+                  <div style={{ color: '#b4690e', fontSize: '1.2rem', marginBottom: 4, letterSpacing: 2 }}>
+                    {'★'.repeat(Math.round(reviewStats.averageRating))}
+                    <span style={{ opacity: 0.5 }}>{'★'.repeat(5 - Math.round(reviewStats.averageRating))}</span>
+                  </div>
+                  <div style={{ color: '#888', fontSize: '0.95rem' }}>Tutorial rating</div>
+                </div>
+                {/* Rating Breakdown */}
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center' }}>
+                  {[5, 4, 3, 2, 1].map((star, i) => {
+                    const percentage = [
+                      reviewStats.fiveStarRating,
+                      reviewStats.fourStarRating,
+                      reviewStats.threeStarRating,
+                      reviewStats.twoStarRating,
+                      reviewStats.oneStarRating
+                    ][i];
+                    return (
+                      <div key={star} style={{ display: 'grid', gridTemplateColumns: '220px 90px 50px', alignItems: 'center', gap: 0, marginBottom: 2 }}>
+                        <div style={{ height: 10, background: '#e5e7eb', borderRadius: 4, overflow: 'hidden', width: '100%', marginRight: 0 }}>
+                          <div style={{ width: `${percentage}%`, height: '100%', background: '#b4690e' }}></div>
+                        </div>
+                        <span style={{ color: '#b4690e', fontSize: '1.1rem', letterSpacing: 1, display: 'inline-block', textAlign: 'left', paddingLeft: 16, marginRight: 16 }}>{'★'.repeat(star)}</span>
+                        <span style={{ color: '#5624d0', fontSize: '0.95rem', cursor: 'pointer', display: 'inline-block', paddingLeft: '2rem' }}>{percentage}%</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Reviews List */}
             <h3 style={{ fontWeight: 700, fontSize: '1.2rem', margin: '32px 0 16px 0' }}>Reviews</h3>
-            {/* Mock reviews data */}
-            {[
-              {
-                username: 'Ana C.',
-                rating: 5,
-                time: 'a week ago',
-                comment: "Super useful! I'm a beginner and found this course an invaluable resource. It's fast, concrete, easy to follow and not boring at all. Thanks a lot for making this tool available.",
-              },
-              {
-                username: 'Johanna A.',
-                rating: 4,
-                time: 'a week ago',
-                comment: 'Very helpful and super informative, love that they provided a cheat sheet and pictures of the work course slides',
-              },
-              {
-                username: 'Suliman K.',
-                rating: 3,
-                time: 'a week ago',
-                comment: 'dont waste your time here. here are just slides and nothing else. find a real practical course where you can learn practically.',
-              },
-            ].map((review, idx) => (
-              <div key={idx} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 20, marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#23243a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, marginRight: 16 }}>
-                    {review.username.split(' ').map(n => n[0]).join('')}
+            {loadingReviews && reviews.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '2rem' }}>Loading reviews...</div>
+            ) : (
+              <>
+                {reviews.map((review) => (
+                  <div key={review.id} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 20, marginBottom: 24 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#23243a', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 18, marginRight: 16 }}>
+                        {review.username.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: 16 }}>{review.username}</div>
+                        <div style={{ color: '#888', fontSize: 13 }}>
+                          {new Date(review.createdAt).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </div>
+                      </div>
+                      <div style={{ color: '#b4690e', fontSize: 18, fontWeight: 700, marginLeft: 8 }}>
+                        {'★'.repeat(review.rating)}<span style={{ opacity: 0.3 }}>{'★'.repeat(5 - review.rating)}</span>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 16, color: '#23243a', marginBottom: 16 }}>{review.comment}</div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: 16 }}>{review.username}</div>
-                    <div style={{ color: '#888', fontSize: 13 }}>{review.time}</div>
+                ))}
+                
+                {currentPage < totalPages - 1 && (
+                  <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+                    <Button
+                      label={loadingReviews ? "Loading..." : "Load more reviews"}
+                      onClick={handleLoadMore}
+                      disabled={loadingReviews}
+                      className="p-button-text"
+                      style={{ color: '#6d28d2', fontWeight: 600 }}
+                    />
                   </div>
-                  <div style={{ color: '#b4690e', fontSize: 18, fontWeight: 700, marginLeft: 8 }}>{'★'.repeat(review.rating)}<span style={{ opacity: 0.3 }}>{'★'.repeat(5 - review.rating)}</span></div>
-                </div>
-                <div style={{ fontSize: 16, color: '#23243a', marginBottom: 16 }}>{review.comment}</div>
-              </div>
-            ))}
+                )}
+              </>
+            )}
           </div>
         </TabPanel>
       </TabView>

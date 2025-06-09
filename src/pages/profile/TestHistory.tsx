@@ -100,7 +100,7 @@ const TestHistory: React.FC = () => {
                         </a>
                     </div> */}
 
-                    <h2 className="profile-header-title text-primary" id="an2572003-trang-công-khai">Kết quả luyện thi - {fullname}</h2>
+                    <h2 className="profile-header-title text-dark" id="an2572003-trang-công-khai">Kết quả luyện thi - {fullname}</h2>
 
                     <div className="profile-header-content">
                         <p></p>

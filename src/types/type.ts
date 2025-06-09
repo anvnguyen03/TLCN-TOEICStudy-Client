@@ -14,6 +14,15 @@ export interface IFetchAccount {
 
 // ------------------ type for DTO got from API response ------------------
 
+export interface ReviewStatistics {
+    averageRating: number
+    oneStarRating: number
+    twoStarRating: number
+    threeStarRating: number
+    fourStarRating: number
+    fiveStarRating: number
+}
+
 export interface CourseDetailResponse {
     id: number;
     title: string;
@@ -111,6 +120,12 @@ export interface CourseInfoDTO {
             free: boolean;
         }[];
     }[];
+}
+
+export interface CourseReviewPagingDTO {
+    reviews: CourseReviewDTO[]
+    totalPages: number
+    totalElements: number
 }
 
 export interface CourseReviewDTO {
@@ -329,6 +344,13 @@ export type AnswerOption = {
 }
 
 // ------------------ type for DTO to send API request ------------------
+
+export type CourseReviewRequest = {
+    courseId: number
+    rating: number
+    comment: string
+}
+
 export type SubmitAnswer = {
     questionId: number
     answer: string | null
@@ -485,4 +507,14 @@ export interface PaginatedResponse<T> {
     numberOfElements: number
     first: boolean
     empty: boolean
+}
+
+export interface UserLearningDTO {
+    id: number
+    thumbnailUrl: string
+    title: string
+    level: string
+    progress: number
+    rating?: number
+    review?: string
 }

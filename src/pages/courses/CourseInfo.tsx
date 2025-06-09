@@ -174,7 +174,7 @@ const CourseInfo = () => {
                 <div className="absolute top-0 left-0 p-4 text-white">
                     <h1 className="text-3xl font-bold">{course.title}</h1>
                     <div className="flex align-items-center mt-2">
-                        <span className="mr-2 text-primary">{course.rating}</span>
+                        <span className="mr-2 text-primary">{Math.round(course.rating * 10) / 10}</span>
                         <Rating value={course.rating} readOnly cancel={false} />
                         <span className="ml-2 text-yellow-500">({course.totalReviews} đánh giá) {course.students} học viên</span>
                     </div>
@@ -318,20 +318,20 @@ const CourseInfo = () => {
                                             className="btn btn-success btn-block p-mt-2"
                                             onClick={handleStartLearning}
                                             style={{ 
-                                                backgroundColor: '#22c55e',
-                                                borderColor: '#22c55e',
+                                                backgroundColor: '#06BBCC',
+                                                borderColor: '#06BBCC',
                                                 fontSize: '1.1rem',
                                                 fontWeight: 'bold',
                                                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                                                 transition: 'all 0.2s ease-in-out'
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#16a34a';
+                                                e.currentTarget.style.backgroundColor = '#06BBCC';
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
                                                 e.currentTarget.style.boxShadow = '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#22c55e';
+                                                e.currentTarget.style.backgroundColor = '#06BBCC';
                                                 e.currentTarget.style.transform = 'translateY(0)';
                                                 e.currentTarget.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)';
                                             }}

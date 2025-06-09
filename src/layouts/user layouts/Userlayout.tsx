@@ -40,7 +40,7 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     // Generic Menu Item Component
     const MenuItem: React.FC<{ icon: string; label: string; url: string }> = ({ icon, label, url }) => (
         <li>
-            <a href={url} style={{ textDecoration: "none" }} className="p-ripple flex px-6 p-3 lg:px-3 lg:py-2 align-items-center text-gray-400 hover:text-white hover:bg-gray-800 font-medium border-round cursor-pointer transition-colors transition-duration-150 w-full z-5">
+            <a href={url} style={{ textDecoration: "none" }} className="p-ripple flex px-6 p-3 lg:px-3 lg:py-2 align-items-center text-white hover:text-primary hover:bg-white font-medium border-round cursor-pointer transition-colors transition-duration-150 w-full z-5">
                 <i className={`${icon} mr-2`}></i>
                 <span>{label}</span>
             </a>
@@ -65,12 +65,15 @@ export const UserLayout = ({ children }: { children: ReactNode }) => {
     const TopBar = (): JSX.Element => (
         <div
             id="topbar"
-            className="fixed top-0 right-0 left-0 bg-gray-900 py-3 px-6 shadow-2 flex align-items-center justify-content-between border-bottom-1 border-gray-800 z-5 opacity-90"
-            style={{ minHeight: '60px' }}
+            className="fixed top-0 right-0 left-0 py-3 px-6 shadow-2 flex align-items-center justify-content-between border-bottom-1 z-5 opacity-90"
+            style={{ minHeight: '60px',
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                borderBottom: '1px solid #00f2fe',
+            }}
         >
             <Logo />
             <MenuButton />
-            <div className="align-items-center flex-grow-1 justify-content-between hidden lg:flex absolute lg:static w-full bg-gray-900 left-0 top-100 z-5 shadow-2 lg:shadow-none border-1 lg:border-none border-gray-800 pb">
+            <div className="align-items-center flex-grow-1 justify-content-between hidden lg:flex absolute lg:static w-full left-0 top-100 z-5 shadow-2 lg:shadow-none border-1 lg:border-none pb">
                 <MenuItems />
                 <div className="list-none p-0 m-0 flex lg:align-items-center select-none flex-column lg:flex-row">
                     <li className="border-top-1 border-gray-800 lg:border-top-none">

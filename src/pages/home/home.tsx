@@ -1,119 +1,265 @@
 import { Button } from "primereact/button"
-import { useAppSelector } from "../../hooks/reduxHooks"
+import { Card } from "primereact/card"
+import { Badge } from "primereact/badge"
 import { UserLayout } from "../../layouts/user layouts/Userlayout"
 import { useNavigate } from "react-router-dom"
 
 const HomePage = () => {
-
     const navigate = useNavigate()
-    const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated)
-    const fullname = useAppSelector(state => state.auth.fullname)
+
+    const features = [
+        {
+            icon: "pi pi-book",
+            title: "Comprehensive Study Materials",
+            description: "Access thousands of TOEIC practice questions, listening exercises, and reading comprehension materials designed by experts."
+        },
+        {
+            icon: "pi pi-chart-line",
+            title: "Progress Tracking",
+            description: "Monitor your improvement with detailed analytics and personalized study recommendations based on your performance."
+        },
+        {
+            icon: "pi pi-clock",
+            title: "Timed Practice Tests",
+            description: "Simulate real TOEIC exam conditions with full-length practice tests and section-specific drills."
+        },
+        {
+            icon: "pi pi-users",
+            title: "Expert Support",
+            description: "Get guidance from certified TOEIC instructors and join our community of learners worldwide."
+        },
+        {
+            icon: "pi pi-mobile",
+            title: "Learn Anywhere",
+            description: "Study on-the-go with our mobile-optimized platform. Practice during commutes or breaks."
+        },
+        {
+            icon: "pi pi-star",
+            title: "Proven Results",
+            description: "Join thousands of successful students who improved their TOEIC scores by an average of 150+ points."
+        }
+    ]
+
+    const testimonials = [
+        {
+            score: "950",
+            improvement: "+200",
+            name: "Sarah Chen",
+            role: "Marketing Manager",
+            comment: "TOEIC Study helped me achieve my dream score for my promotion!"
+        },
+        {
+            score: "880",
+            improvement: "+180",
+            name: "Hiroshi Tanaka",
+            role: "Software Engineer",
+            comment: "The practice tests were incredibly similar to the real exam."
+        },
+        {
+            score: "920",
+            improvement: "+160",
+            name: "Maria Rodriguez",
+            role: "International Student",
+            comment: "Perfect preparation for university applications abroad."
+        }
+    ]
 
     return (
         <UserLayout>
             <div className="surface-200">
-                {isAuthenticated &&
-                    <div className="bg-bluegray-900 text-gray-100 p-3 flex justify-content-between 
-                lg:justify-content-center align-items-center flex-wrap">
-                        <div className="font-bold mr-4">🔥 Welcome back!</div>
-                        <div className="align-items-center hidden lg:flex">
-                            <span className="line-height-3">{fullname}</span>
-                        </div>
-                    </div>
-                }
-
-                <div className="relative p-6 overflow-hidden">
-                    <img id="j_idt42:blockViewerForm:j_idt49" src="/hero-2.jpg" className="absolute top-0 left-0 w-auto h-full block md:w-full" alt="Image" />
-                    <div className="text-center my-6 relative">
-                        <div className="text-6xl text-white font-bold mb-1">The Platform For</div>
-                        <div className="text-6xl text-primary font-bold mb-4">Today's Generation</div>
-                        <p className="mt-0 mb-4 line-height-3 text-center mx-auto text-white" style={{ maxWidth: '500px' }}>
-                            Nền tảng học tập và luyện thi TOEIC trực tuyến - TOEIC STUDY
+                {/* Hero Section */}
+                <div className="relative p-6 overflow-hidden" style={{ minHeight: '70vh' }}>
+                    <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundColor: 'rgba(13, 71, 161, 0.85)' }}></div>
+                    <img 
+                        src="/carousel-1.jpg" 
+                        className="absolute top-0 left-0 w-full h-full object-cover" 
+                        style={{ opacity: 0.2 }} 
+                        alt="TOEIC Study Background" 
+                    />
+                    
+                    <div className="relative z-1 flex flex-column align-items-center justify-content-center h-full text-center py-8">
+                        <Badge value="🏆 #1 TOEIC Prep Platform" className="mb-4" severity="warning" />
+                        
+                        <h1 className="text-6xl md:text-7xl text-white font-bold mb-3 line-height-2">
+                            Master Your
+                            <span className="text-yellow-300 block">TOEIC Score</span>
+                        </h1>
+                        
+                        <p className="text-xl text-blue-100 mb-6 max-w-600px line-height-3">
+                            Join over 100,000+ students who achieved their target TOEIC scores with our comprehensive online learning platform
                         </p>
-                        <Button className="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" type="button" onClick={() => navigate('/tests')}>
-                            <span className="ui-button-text ui-c">Explore now</span>
-                        </Button>
-
-                        <p className="text-sm mt-4 mb-4 line-height-3 text-white">Available for MacOS, Web and Google accounts
-                            only</p>
-                        <div className="flex justify-content-center align-items-center">
-                            <a href="https://www.apple.com" className="text-white mr-3">
-                                <i className="pi pi-apple text-2xl"></i>
-                            </a>
-                            <a href="https://play.google.com" className="text-white mr-3">
-                                <i className="pi pi-android text-2xl"></i>
-                            </a>
-                            <a href="https://www.facebook.com" className="text-white">
-                                <i className="pi pi-facebook text-2xl"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div className="surface-0 text-center px-4 py-8">
-                    <div className="mb-3 font-bold text-3xl">
-                        <span className="text-900">One Product, </span>
-                        <span className="text-blue-600">Many Solutions</span>
-                    </div>
-                    <div className="text-700 mb-6">Ac turpis egestas maecenas pharetra convallis posuere morbi leo urna.</div>
-                    <div className="grid">
-                        <div className="col-12 md:col-4 mb-4 px-5">
-                            <span className="p-3 shadow-2 mb-3 inline-block" style={{ borderRadius: '10px' }}>
-                                <i className="pi pi-desktop text-4xl text-blue-500"></i>
-                            </span>
-                            <div className="text-900 text-xl mb-3 font-medium">Built for Everyone</div>
-                            <span className="text-700 line-height-3">Toeic Study là nền tảng học tập được xây dựng phù hợp cho tất cả mọi người từ học sinh, sinh viên đến người đi làm.</span>
-                        </div>
-                        <div className="col-12 md:col-4 mb-4 px-5">
-                            <span className="p-3 shadow-2 mb-3 inline-block" style={{ borderRadius: '10px' }}>
-                                <i className="pi pi-lock text-4xl text-blue-500"></i>
-                            </span>
-                            <div className="text-900 text-xl mb-3 font-medium">End-to-End Encryption</div>
-                            <span className="text-700 line-height-3">Cam kết bảo mật thông tin cá nhân của người dùng.</span>
-                        </div>
-                        <div className="col-12 md:col-4 mb-4 px-5">
-                            <span className="p-3 shadow-2 mb-3 inline-block" style={{ borderRadius: '10px' }}>
-                                <i className="pi pi-check-circle text-4xl text-blue-500"></i>
-                            </span>
-                            <div className="text-900 text-xl mb-3 font-medium">Easy to Use</div>
-                            <span className="text-700 line-height-3">Giao diện thân thiện trực quan, dễ tiếp cận và sử dụng cho đa dạng lứa tuổi.</span>
-                        </div>
-                        <div className="col-12 md:col-4 mb-4 px-5">
-                            <span className="p-3 shadow-2 mb-3 inline-block" style={{ borderRadius: '10px' }}>
-                                <i className="pi pi-globe text-4xl text-blue-500"></i>
-                            </span>
-                            <div className="text-900 text-xl mb-3 font-medium">Fast & Global Support</div>
-                            <span className="text-700 line-height-3">Hỗ trợ nhanh chóng trên toàn cầu.</span>
+                        
+                        <div className="flex flex-column md:flex-row gap-3 mb-6">
+                            <Button 
+                                label="Start Free Trial" 
+                                icon="pi pi-play"
+                                className="p-button-warning p-button-lg font-bold px-6 py-3"
+                                raised
+                                onClick={() => navigate('/courses')}
+                            />
+                            <Button 
+                                label="View Sample Test" 
+                                icon="pi pi-eye"
+                                className="p-button-outlined p-button-lg font-bold px-6 py-3"
+                                style={{ color: 'white', borderColor: 'white' }}
+                                onClick={() => navigate('/tests')}
+                            />
                         </div>
                         
-                        <div className="col-12 md:col-4 md:mb-4 mb-0 px-3">
-                            <span className="p-3 shadow-2 mb-3 inline-block" style={{ borderRadius: '10px' }}>
-                                <i className="pi pi-shield text-4xl text-blue-500"></i>
-                            </span>
-                            <div className="text-900 text-xl mb-3 font-medium">Trusted Resources</div>
-                            <span className="text-700 line-height-3">Cung cấp đa dạng phong phú bài thi, tài nguyên học tập được đảm bảo chất lượng.</span>
+                        <div className="flex align-items-center gap-4 text-blue-100">
+                            <div className="flex align-items-center gap-2">
+                                <i className="pi pi-check-circle text-green-300"></i>
+                                <span>No Credit Card Required</span>
+                            </div>
+                            <div className="flex align-items-center gap-2">
+                                <i className="pi pi-users text-blue-300"></i>
+                                <span>100,000+ Active Users</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="surface-section px-4 pb-8 md:px-6 lg:px-8">
-                    <div
-                        className="p-6 shadow-2 flex flex-column md:flex-row align-items-center justify-content-between"
-                        style={{ borderRadius: '1rem', background: 'linear-gradient(0deg, rgba(0, 123, 255, 0.5), rgba(0, 123, 255, 0.5)), linear-gradient(92.54deg, #1C80CF 47.88%, #FFFFFF 100.01%)' }}
+                {/* Stats Section */}
+                <div className="surface-0 py-6">
+                    <div className="grid text-center">
+                        <div className="col-12 md:col-3">
+                            <div className="text-4xl font-bold text-blue-600 mb-2">150+</div>
+                            <div className="text-700">Average Score Improvement</div>
+                        </div>
+                        <div className="col-12 md:col-3">
+                            <div className="text-4xl font-bold text-blue-600 mb-2">10,000+</div>
+                            <div className="text-700">Practice Questions</div>
+                        </div>
+                        <div className="col-12 md:col-3">
+                            <div className="text-4xl font-bold text-blue-600 mb-2">95%</div>
+                            <div className="text-700">Success Rate</div>
+                        </div>
+                        <div className="col-12 md:col-3">
+                            <div className="text-4xl font-bold text-blue-600 mb-2">24/7</div>
+                            <div className="text-700">Study Access</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Features Section */}
+                <div className="surface-50 px-4 py-8">
+                    <div className="text-center mb-8">
+                        <h2 className="text-4xl font-bold text-900 mb-3">
+                            Why Choose <span className="text-blue-600">TOEIC Study?</span>
+                        </h2>
+                        <p className="text-700 text-xl max-w-600px mx-auto">
+                            Everything you need to achieve your target TOEIC score in one comprehensive platform
+                        </p>
+                    </div>
+                    
+                    <div className="grid">
+                        {features.map((feature, index) => (
+                            <div key={index} className="col-12 md:col-6 lg:col-4 p-3">
+                                <Card className="h-full hover:shadow-4 transition-all transition-duration-300">
+                                    <div className="text-center p-4">
+                                        <div 
+                                            className="inline-flex align-items-center justify-content-center mb-4"
+                                            style={{ 
+                                                width: '80px', 
+                                                height: '80px', 
+                                                borderRadius: '50%',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                                            }}
+                                        >
+                                            <i className={`${feature.icon} text-3xl text-white`}></i>
+                                        </div>
+                                        <h3 className="text-xl font-bold text-900 mb-3">{feature.title}</h3>
+                                        <p className="text-700 line-height-3">{feature.description}</p>
+                                    </div>
+                                </Card>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Testimonials Section */}
+                <div className="surface-0 px-4 py-8">
+                    <div className="text-center mb-8">
+                        <h2 className="text-4xl font-bold text-900 mb-3">
+                            <span className="text-blue-600">Success Stories</span> from Our Students
+                        </h2>
+                        <p className="text-700 text-xl">Real results from real students</p>
+                    </div>
+                    
+                    <div className="grid">
+                        {testimonials.map((testimonial, index) => (
+                            <div key={index} className="col-12 md:col-4 p-3">
+                                <Card className="h-full">
+                                    <div className="p-4">
+                                        <div className="flex align-items-center justify-content-between mb-4">
+                                            <div className="flex align-items-center gap-3">
+                                                <div 
+                                                    className="w-4rem h-4rem border-circle flex align-items-center justify-content-center text-white font-bold text-xl"
+                                                    style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}
+                                                >
+                                                    {testimonial.name.split(' ').map(n => n[0]).join('')}
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-900">{testimonial.name}</div>
+                                                    <div className="text-600 text-sm">{testimonial.role}</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-3xl font-bold text-blue-600">{testimonial.score}</div>
+                                                <Badge value={testimonial.improvement} severity="success" />
+                                            </div>
+                                        </div>
+                                        <p className="text-700 italic">"{testimonial.comment}"</p>
+                                        <div className="flex mt-3">
+                                            {[1,2,3,4,5].map(star => (
+                                                <i key={star} className="pi pi-star-fill text-yellow-500"></i>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </Card>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* CTA Section */}
+                <div className="surface-section px-4 py-8">
+                    <Card 
+                        className="shadow-4"
+                        style={{ 
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            border: 'none'
+                        }}
                     >
-                        <div className="pr-6">
-                            <div className="text-blue-100 font-medium text-xl mb-3">TAKE THE NEXT STEP</div>
-                            <div className="text-white font-medium text-5xl">Empower your customer experience</div>
+                        <div className="p-6 text-center text-white">
+                            <h2 className="text-5xl font-bold mb-3">Ready to Boost Your TOEIC Score?</h2>
+                            <p className="text-xl mb-6 opacity-90">
+                                Join thousands of successful students and start your journey to TOEIC mastery today
+                            </p>
+                            
+                            <div className="flex flex-column md:flex-row align-items-center justify-content-center gap-4 mb-6">
+                                <Button 
+                                    label="Start Your Free Trial"
+                                    icon="pi pi-arrow-right"
+                                    className="p-button-warning p-button-lg font-bold px-6 py-3"
+                                    raised
+                                    onClick={() => navigate('/register')}
+                                />
+                            </div>
+                            
+                            <div className="flex align-items-center justify-content-center gap-6 text-sm opacity-80">
+                                <div className="flex align-items-center gap-2">
+                                    <i className="pi pi-shield"></i>
+                                    <span>30-Day Money Back Guarantee</span>
+                                </div>
+                                <div className="flex align-items-center gap-2">
+                                    <i className="pi pi-clock"></i>
+                                    <span>Cancel Anytime</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="mt-4 mr-auto md:mt-0 md:mr-0">
-                            <Button className="font-bold px-3 py-2 white-space-nowrap" raised rounded severity="warning">
-                                <span className="px-3 py-2">Get Started</span>
-                            </Button>
-                        </div>
-                    </div>
+                    </Card>
                 </div>
-
             </div>
         </UserLayout>
     )

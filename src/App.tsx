@@ -34,6 +34,7 @@ import { ProtectedAdminRoute, ProtectedUserRoute, PublicRoute } from './componen
 import CourseLearnWrapper from './components/course/CourseLearnWrapper'
 import CourseTrialWrapper from './components/course/course trial/CourseTrialWrapper'
 import LoadingOverlay from './components/LoadingOverlay'
+import MyLearning from './pages/profile/MyLearning'
 
 function App() {
 
@@ -75,10 +76,12 @@ function App() {
         {/* Protected Routes for User */}
         <Route path="/profile" element={<ProtectedUserRoute><Profile /></ProtectedUserRoute>} />
         <Route path="/test-history" element={<ProtectedUserRoute><TestHistory /></ProtectedUserRoute>} />
+        <Route path="/my-learning" element={<ProtectedUserRoute><MyLearning /></ProtectedUserRoute>} />
         <Route path="/test/:id/:title/simulation/start" element={<ProtectedUserRoute><FullTestSimulation /></ProtectedUserRoute>} />
         <Route path="/test/:id/:title/practice/start" element={<ProtectedUserRoute><FullTestPractice /></ProtectedUserRoute>} />
         <Route path="/test/:testIdParam/results/:resultIdParam" element={<ProtectedUserRoute><TestResult /></ProtectedUserRoute>} />
         <Route path="/courses/:id/learn" element={<ProtectedUserRoute><CourseLearnWrapper /></ProtectedUserRoute>} />
+
 
         {/* Protected Routes for Admin */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" />} />
