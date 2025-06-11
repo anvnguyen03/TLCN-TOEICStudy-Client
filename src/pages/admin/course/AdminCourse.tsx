@@ -23,7 +23,6 @@ import {
   callGetAllCourseDetail,
   callCreateCourse,
   callUpdateCourse,
-  callDeleteCourse,
 } from "../../../services/admin services/ManageCourserService"
 import type { ApiResponse } from "../../../types/type"
 
