@@ -214,8 +214,3 @@ export const callUpdateCourse = async (courseId: number, course: Course): Promis
   })
   return response.data
 }
-
-export const callDeleteCourse = async (courseId: number): Promise<ApiResponse<void>> => {
-  const response = await apiClient.delete<ApiResponse<void>>(`${baseURL}/delete/${courseId}`)
-  return response.data
-}
