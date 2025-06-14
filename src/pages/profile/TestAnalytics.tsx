@@ -18,6 +18,9 @@ import { Tag } from "primereact/tag"
 import { callGetLatestAIAnalysis, callRequestAIAnalysis } from "../../services/AIAnalysisService"
 import { Skeleton } from "primereact/skeleton"
 import { Dialog } from "primereact/dialog"
+import "./TestAnalytics.css"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 type BadgeSeverity = "success" | "info" | "warning" | "danger" | "secondary" | "contrast"
 
@@ -325,7 +328,7 @@ const TestAnalytics: React.FC = () => {
           <p className="text-600 mb-3">Get personalized insights and recommendations based on your test performance.</p>
           <Button
             label="Generate AI Analysis"
-            icon="pi pi-bolt"
+            icon="fa fa-wand-magic-sparkles"
             className="p-button-primary"
             onClick={requestAIAnalysis}
           />
@@ -339,7 +342,7 @@ const TestAnalytics: React.FC = () => {
           <TabPanel header="Overview" leftIcon="pi pi-chart-pie mr-2">
             <div className="p-3 border-round bg-blue-50 mb-4">
               <h4 className="text-lg font-bold text-blue-800 mb-2">Overall Feedback</h4>
-              <p className="text-blue-700 mb-0">{aiAnalysis.overallFeedback}</p>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-blue-700 mb-0">{aiAnalysis.overallFeedback.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
 
             <div className="grid">
@@ -389,23 +392,19 @@ const TestAnalytics: React.FC = () => {
           <TabPanel header="Detailed Analysis" leftIcon="pi pi-list mr-2">
             <div className="p-3 border-round bg-blue-50 mb-4">
               <h4 className="text-lg font-bold text-blue-800 mb-2">Part Analysis</h4>
-              <div className="whitespace-pre-line text-blue-700">{aiAnalysis.partAnalysis}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-blue-700 mb-0">{aiAnalysis.partAnalysis.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
 
             <div className="p-3 border-round bg-purple-50 mb-4">
               <h4 className="text-lg font-bold text-purple-800 mb-2">Skill Analysis</h4>
-              <div className="whitespace-pre-line text-purple-700">{aiAnalysis.skillAnalysis}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-purple-700 mb-0">{aiAnalysis.skillAnalysis.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
           </TabPanel>
 
           <TabPanel header="Improvement Plan" leftIcon="pi pi-arrow-up mr-2">
             <div className="p-3 border-round bg-green-50 mb-4">
               <h4 className="text-lg font-bold text-green-800 mb-2">Improvement Suggestions</h4>
-              <div className="whitespace-pre-line text-green-700">{aiAnalysis.improvementSuggestions}</div>
-            </div>
-
-            <div className="flex justify-content-center mt-4">
-              <Button label="Create Study Plan" icon="pi pi-calendar-plus" className="p-button-success" />
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-green-700 mb-0">{aiAnalysis.improvementSuggestions.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
           </TabPanel>
         </TabView>
@@ -417,7 +416,7 @@ const TestAnalytics: React.FC = () => {
           </small>
           <Button
             label="Refresh Analysis"
-            icon="pi pi-refresh"
+            icon="fa fa-wand-magic-sparkles"
             className="p-button-outlined p-button-sm"
             onClick={requestAIAnalysis}
             loading={aiAnalysisLoading}
@@ -441,7 +440,7 @@ const TestAnalytics: React.FC = () => {
           <div className="p-3">
             <div className="p-3 border-round bg-blue-50 mb-4">
               <h4 className="text-lg font-bold text-blue-800 mb-2">Overall Feedback</h4>
-              <p className="text-blue-700 mb-0">{aiAnalysis.overallFeedback}</p>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-blue-700 mb-0">{aiAnalysis.overallFeedback.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
 
             <div className="grid">
@@ -491,17 +490,17 @@ const TestAnalytics: React.FC = () => {
 
             <div className="p-3 border-round bg-blue-50 mb-4">
               <h4 className="text-lg font-bold text-blue-800 mb-2">Part Analysis</h4>
-              <div className="whitespace-pre-line text-blue-700">{aiAnalysis.partAnalysis}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-blue-700 mb-0">{aiAnalysis.partAnalysis.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
 
             <div className="p-3 border-round bg-purple-50 mb-4">
               <h4 className="text-lg font-bold text-purple-800 mb-2">Skill Analysis</h4>
-              <div className="whitespace-pre-line text-purple-700">{aiAnalysis.skillAnalysis}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-purple-700 mb-0">{aiAnalysis.skillAnalysis.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
 
             <div className="p-3 border-round bg-green-50 mb-4">
               <h4 className="text-lg font-bold text-green-800 mb-2">Improvement Suggestions</h4>
-              <div className="whitespace-pre-line text-green-700">{aiAnalysis.improvementSuggestions}</div>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} className="markdown text-green-700 mb-0">{aiAnalysis.improvementSuggestions.replace(/\\n/g, "\n")}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -527,7 +526,7 @@ const TestAnalytics: React.FC = () => {
               <Card className="text-center h-full">
                 <div className="p-4">
                   <div className="text-3xl font-bold text-blue-600 mb-2">{analyticsData.currentScore}</div>
-                  <div className="text-sm text-600 mb-2">Best Score</div>
+                  <div className="text-sm text-600 mb-2">Latest Score</div>
                   <Badge value={currentLevel.level} severity={currentLevel.color} />
                   <div className="text-xs text-500 mt-1">{currentLevel.description}</div>
                 </div>

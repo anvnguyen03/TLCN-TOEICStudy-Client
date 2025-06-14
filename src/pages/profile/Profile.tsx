@@ -185,7 +185,7 @@ const Profile: React.FC = () => {
             </Dialog>
             <div style={{
                 minHeight: '100vh',
-                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                // background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
