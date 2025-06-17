@@ -21,12 +21,12 @@ const AdminAddTest = () => {
 
     const items: MenuItem[] = [
         {
-            label: 'Full Test',
+            label: 'TOEIC RC+LC',
             icon: 'pi pi-arrow-right',
             command: () => navigate('/admin/test/add/full-test')
         },
         {
-            label: 'Part',
+            label: 'TOEIC SP+WR',
             icon: 'pi pi-arrow-right',
             command: () => navigate('/admin/test/add/full-test')
         }

@@ -18,9 +18,15 @@ apiClient.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`
     }
 
+    // For FormData requests, let the browser set the Content-Type
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
+
     return config
   },
   (error) => {
+    console.error('Request error:', error)
     return Promise.reject(error)
   }
 )
@@ -31,11 +37,30 @@ apiClient.interceptors.response.use(
     return response
   },
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Handle unauthorized errors (e.g., token expired)
-      // store.dispatch(logout())
-      localStorage.removeItem('token')
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout:', error)
+      return Promise.reject(new Error('Request timeout. Please try again.'))
     }
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Response error:', error.response.data)
+      
+      if (error.response.status === 401) {
+        // Handle unauthorized errors (e.g., token expired)
+        localStorage.removeItem('token')
+        window.location.href = '/login' // Redirect to login page
+      }
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request)
+      return Promise.reject(new Error('No response from server. Please check your connection.'))
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Request setup error:', error.message)
+    }
+    
     return Promise.reject(error)
   }
 )

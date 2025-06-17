@@ -225,7 +225,7 @@ const TestResult: React.FC = () => {
                                     className="w-full justify-content-start"
                                     text="Chú ý: Bạn có thể tạo flashcards từ highlights (bao gồm các highlights các bạn đã tạo trước đây) trong trang chi tiết kết quả bài thi." />
                                 <br />
-                                <Chip label="#Full Test" style={{ fontSize: 'small' }} className="mt-4" />
+                                <Chip label="#TOEIC RC+LC" style={{ fontSize: 'small' }} className="mt-4" />
                                 <h2 className="mb-3 text-black-alpha-90">
                                     Kết quả: {userResult?.testTitle}
                                     <Tag severity={getSeverity(userResult?.testMode)} value={userResult?.testMode} className="ml-2" rounded></Tag>

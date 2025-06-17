@@ -556,29 +556,6 @@ const TestAnalytics: React.FC = () => {
             </div>
           </div>
 
-          {/* AI Analysis Section */}
-          <Card className="mb-6">
-            <div className="p-4">
-              <div className="flex align-items-center justify-content-between mb-3">
-                <h3 className="text-xl font-bold flex align-items-center gap-2">
-                  <i className="pi pi-bolt text-purple-500"></i>
-                  AI-Powered Performance Analysis
-                  <Tag value="NEW" severity="info" className="ml-2" />
-                </h3>
-                {aiAnalysis && (
-                  <Button
-                    label="View Full Analysis"
-                    icon="pi pi-external-link"
-                    className="p-button-outlined"
-                    onClick={() => setShowAiDialog(true)}
-                  />
-                )}
-              </div>
-
-              {renderAIAnalysisContent()}
-            </div>
-          </Card>
-
           {/* Overall Performance Statistics */}
           <Card className="mb-6">
             <div className="p-4">
@@ -796,7 +773,7 @@ const TestAnalytics: React.FC = () => {
           </Card>
 
           {/* Recent Test Results */}
-          <Card>
+          <Card className="mb-6">
             <div className="p-4">
               <div className="flex align-items-center justify-content-between mb-4">
                 <h3 className="text-xl font-bold">Recent Test Results</h3>
@@ -825,6 +802,30 @@ const TestAnalytics: React.FC = () => {
               </DataTable>
             </div>
           </Card>
+
+          {/* AI Analysis Section */}
+          <Card className="mb-6">
+            <div className="p-4">
+              <div className="flex align-items-center justify-content-between mb-3">
+                <h3 className="text-xl font-bold flex align-items-center gap-2">
+                  <i className="pi pi-sparkles text-purple-500"></i>
+                  <span className="rainbow-text">AI-Powered Performance Analysis</span>
+                  <Tag value="NEW" severity="info" className="ml-2" />
+                </h3>
+                {aiAnalysis && (
+                  <Button
+                    label="View Full Analysis"
+                    icon="pi pi-external-link"
+                    className="p-button-outlined"
+                    onClick={() => setShowAiDialog(true)}
+                  />
+                )}
+              </div>
+
+              {renderAIAnalysisContent()}
+            </div>
+          </Card>
+
         </div>
       </div>
     </UserLayout>
